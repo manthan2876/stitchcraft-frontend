@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import Customers from './pages/Customers';
 import CustomerDetails from './pages/CustomerDetails';
 import Orders from './pages/Orders';
+import OrderDetails from './pages/OrderDetails';
 import NewOrder from './pages/NewOrder';
 import EditOrder from './pages/EditOrder';
 import Payments from './pages/Payments';
@@ -40,6 +41,7 @@ export const App = () => {
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/customers/:id" element={<CustomerDetails />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/orders/:id" element={<OrderDetails />} />
                 <Route path="/new-order" element={<NewOrder />} />
                 <Route path="/orders/:id/edit" element={<EditOrder />} />
                 <Route path="/payments" element={<Payments />} />

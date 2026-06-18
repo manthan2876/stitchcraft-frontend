@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { useLanguage } from '../../context/LanguageContext';
 import { MdEdit, MdSearch, MdTune } from 'react-icons/md';
@@ -106,8 +107,10 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
 
                 return (
                   <tr key={order._id} className="hover:bg-bg-hover transition-colors group">
-                    <td className="px-6 py-4 text-sm font-bold text-text-main">
-                      {order.orderId}
+                    <td className="px-6 py-4 text-sm font-bold">
+                      <Link to={`/orders/${order._id}`} className="text-color-accent-purple hover:underline">
+                        {order.orderId}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-text-main/90">
                       {order.customerName}

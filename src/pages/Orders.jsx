@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
 import Card from '../components/common/Card';
@@ -181,7 +181,11 @@ export const Orders = () => {
               ) : (
                 filteredOrders.map((order) => (
                   <tr key={order._id} className="hover:bg-bg-hover transition-colors">
-                    <td className="px-6 py-4 text-sm font-black text-text-main">{order.orderId}</td>
+                    <td className="px-6 py-4 text-sm font-black">
+                      <Link to={`/orders/${order._id}`} className="text-color-accent-purple hover:underline">
+                        {order.orderId}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main/90">{order.customerName}</td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">{order.apparelType ? tf('apparel' + order.apparelType, order.apparelType) : '—'}</td>
                     {/* Measurement type badge */}
