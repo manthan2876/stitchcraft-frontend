@@ -16,7 +16,7 @@ export const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
   const [selectedItem, setSelectedItem] = useState(null);
-  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '' });
+  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '' });
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
@@ -48,7 +48,7 @@ export const Inventory = () => {
   }, [searchTerm]);
 
   const handleOpenAddModal = () => {
-    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '' });
+    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '0' });
     setModalMode('add');
     setSelectedItem(null);
     setFormError('');
@@ -62,7 +62,8 @@ export const Inventory = () => {
       unit: item.unit || 'meters',
       minQuantity: String(item.minQuantity),
       purchaseAmount: '',
-      description: ''
+      description: '',
+      costPerUnit: String(item.costPerUnit || 0)
     });
     setModalMode('edit');
     setSelectedItem(item);
@@ -85,7 +86,8 @@ export const Inventory = () => {
         unit: form.unit,
         minQuantity: Number(form.minQuantity) || 10,
         purchaseAmount: Number(form.purchaseAmount) || 0,
-        description: form.description || ''
+        description: form.description || '',
+        costPerUnit: Number(form.costPerUnit) || 0
       };
 
       if (modalMode === 'add') {
@@ -182,6 +184,7 @@ export const Inventory = () => {
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('stockLevel', 'Stock Level')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('unitType', 'Unit Type')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('minThreshold', 'Min Threshold')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('costPrice', 'Cost Price')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('lastCost', 'Last Cost')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('status', 'Status')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-center">{tf('actions', 'Actions')}</th>
@@ -190,13 +193,13 @@ export const Inventory = () => {
             <tbody className="divide-y divide-border-subtle">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="8" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('syncing', 'Syncing...')}
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="8" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('noRecords', 'No inventory records found.')}
                   </td>
                 </tr>
@@ -210,6 +213,9 @@ export const Inventory = () => {
                     <td className="px-6 py-4 text-sm font-semibold text-text-muted capitalize">{tf(item.unit, item.unit)}</td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">
                       {item.minQuantity} {tf(item.unit, item.unit)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-text-muted">
+                      {item.costPerUnit > 0 ? formatCurrency(item.costPerUnit) : '—'}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main">
                       {item.lastPurchaseAmount > 0 ? formatCurrency(item.lastPurchaseAmount) : '—'}
@@ -321,6 +327,19 @@ export const Inventory = () => {
                   value={form.minQuantity}
                   onChange={e => setForm({ ...form, minQuantity: e.target.value })}
                   placeholder="Low stock alert trigger (e.g. 10)"
+                  className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('costPerUnit', 'Cost Price per Unit (₹)')}</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={form.costPerUnit}
+                  onChange={e => setForm({ ...form, costPerUnit: e.target.value })}
+                  placeholder={tf('costPerUnitPlaceholder', 'e.g. 30')}
                   className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
                 />
               </div>
