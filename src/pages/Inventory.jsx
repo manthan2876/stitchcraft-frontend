@@ -265,7 +265,7 @@ export const Inventory = () => {
                       {item.lastPurchaseAmount > 0 ? formatCurrency(item.lastPurchaseAmount) : '—'}
                     </td>
                     <td className="px-6 py-4 text-xs font-bold">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${getStatusBadge(item.status)}`}>
+                      <span style={{ whiteSpace: 'nowrap' }} className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${getStatusBadge(item.status)}`}>
                         {item.status === 'In Stock'
                           ? tf('inStock', 'In Stock')
                           : item.status === 'Low Stock'

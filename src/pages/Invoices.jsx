@@ -167,7 +167,7 @@ export const Invoices = () => {
                     <td className="px-6 py-4 text-sm font-bold text-text-main">{formatCurrency(inv.total)}</td>
                     <td className="px-6 py-4 text-sm font-bold text-color-accent-pink">{formatCurrency(inv.balance)}</td>
                     <td className="px-6 py-4 text-xs">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${getStatusBadgeClass(inv.status)}`}>
+                      <span style={{ whiteSpace: 'nowrap' }} className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${getStatusBadgeClass(inv.status)}`}>
                         {tf(inv.status.toLowerCase(), inv.status)}
                       </span>
                     </td>

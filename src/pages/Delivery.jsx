@@ -128,7 +128,7 @@ export const Delivery = () => {
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">{del.apparelType}</td>
                     <td className="px-6 py-4 text-xs font-bold text-text-main">{formatDate(del.deliveryDate)}</td>
                     <td className="px-6 py-4 text-xs">
-                      <span className={`px-2.5 py-1 rounded-md font-bold uppercase tracking-wider ${getTabBadgeColor(del.status)}`}>
+                      <span style={{ whiteSpace: 'nowrap' }} className={`px-2.5 py-1 rounded-md font-bold uppercase tracking-wider ${getTabBadgeColor(del.status)}`}>
                         {getTabLabel(del.status)}
                       </span>
                     </td>
@@ -136,6 +136,7 @@ export const Delivery = () => {
                       {del.status === 'Pending' ? (
                         <button
                           onClick={() => handleMarkDelivered(del._id)}
+                          style={{ whiteSpace: 'nowrap' }}
                           className="px-3.5 py-1.5 bg-color-accent-emerald text-white-forced rounded-lg text-xs font-extrabold flex items-center gap-1.5 hover:bg-emerald-600 active:scale-95 transition-all shadow-md shadow-emerald-950/20 cursor-pointer ml-auto"
                         >
                           <MdCheckCircle className="w-4 h-4 text-white-forced" />

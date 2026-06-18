@@ -201,7 +201,7 @@ export const Karigars = () => {
                   </div>
                 </div>
 
-                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getStatusClass(karigar.status)}`}>
+                <span style={{ whiteSpace: 'nowrap' }} className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getStatusClass(karigar.status)}`}>
                   {karigar.status === 'Active' ? tf('active', 'Active') : tf('inactive', 'Inactive')}
                 </span>
               </div>

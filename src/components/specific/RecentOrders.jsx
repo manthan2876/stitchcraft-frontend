@@ -142,7 +142,7 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
                         </select>
                       ) : (
                         <span
-                          style={{ color: colors.text, backgroundColor: colors.bg }}
+                          style={{ color: colors.text, backgroundColor: colors.bg, whiteSpace: 'nowrap' }}
                           className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full"
                         >
                           <span style={{ backgroundColor: colors.text }} className="w-1.5 h-1.5 rounded-full"></span>

@@ -195,7 +195,7 @@ export const Machines = () => {
                   </div>
                 </div>
 
-                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getStatusClass(machine.status)}`}>
+                <span style={{ whiteSpace: 'nowrap' }} className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getStatusClass(machine.status)}`}>
                   {machine.status === 'Working' ? tf('working', 'Working') : machine.status === 'Maintenance' ? tf('maintenance', 'Maintenance') : machine.status === 'Broken' ? tf('broken', 'Broken') : machine.status}
                 </span>
               </div>

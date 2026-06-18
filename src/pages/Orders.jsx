@@ -192,11 +192,11 @@ export const Orders = () => {
                     {/* Measurement type badge */}
                     <td className="px-6 py-4 text-xs font-bold">
                       {order.measurementType === 'Maap' ? (
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20">
+                        <span style={{ whiteSpace: 'nowrap' }} className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20">
                           🧵 Maap
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/20">
+                        <span style={{ whiteSpace: 'nowrap' }} className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/20">
                           📏 Meas.
                         </span>
                       )}
@@ -205,24 +205,24 @@ export const Orders = () => {
                     <td className="px-6 py-4 text-xs font-bold">
                       {order.needsAster ? (
                         <div className="flex flex-col gap-1">
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 inline-flex items-center gap-1">
+                          <span style={{ whiteSpace: 'nowrap' }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 inline-flex items-center gap-1">
                             Yes{order.asterQuantity > 0 ? ` · ${order.asterQuantity}` : ''}
                           </span>
                           {order.asterDeducted && (
-                            <span className="text-[9px] text-color-accent-emerald font-extrabold flex items-center gap-0.5">✓ Stock deducted</span>
+                            <span style={{ whiteSpace: 'nowrap' }} className="text-[9px] text-color-accent-emerald font-extrabold flex items-center gap-0.5">✓ Stock deducted</span>
                           )}
                         </div>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-bg-hover text-text-muted border border-border-subtle">{tf('noVal', 'No')}</span>
+                        <span style={{ whiteSpace: 'nowrap' }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-bg-hover text-text-muted border border-border-subtle">{tf('noVal', 'No')}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">
                       {order.assignedKarigar ? (
-                        <Link to={`/karigars/${order.assignedKarigar._id || order.assignedKarigar}`} className="text-color-accent-purple hover:underline font-semibold">
+                        <Link to={`/karigars/${order.assignedKarigar._id || order.assignedKarigar}`} style={{ whiteSpace: 'nowrap' }} className="text-color-accent-purple hover:underline font-semibold">
                           {order.assignedKarigar.name || order.assignedKarigar}
                         </Link>
                       ) : (
-                        <span className="opacity-40 font-medium italic">{tf('unassigned', 'Unassigned')}</span>
+                        <span style={{ whiteSpace: 'nowrap' }} className="opacity-40 font-medium italic">{tf('unassigned', 'Unassigned')}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-xs font-bold text-text-muted">{formatDate(order.date)}</td>

@@ -27,7 +27,7 @@ export const LedgerRow = ({ tx, index, onEdit, onViewDetails }) => {
         {isCredit ? '+' : '-'}{formatCurrency(tx.amount || 0)}
       </td>
       <td className="px-6 py-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-color-accent-blue/15 text-color-accent-blue">
+        <span style={{ whiteSpace: 'nowrap' }} className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-color-accent-blue/15 text-color-accent-blue">
           <span className="w-1.5 h-1.5 rounded-full bg-color-accent-blue"></span>
           {tx.status}
         </span>

@@ -262,16 +262,16 @@ export const OrderDetails = () => {
                 <div className="self-start sm:self-auto">
                   {order.needsAster ? (
                     order.asterDeducted ? (
-                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md whitespace-nowrap">
+                      <span style={{ whiteSpace: 'nowrap' }} className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">
                         ✓ {tf('deducted', 'Stock Deducted')}
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md whitespace-nowrap">
+                      <span style={{ whiteSpace: 'nowrap' }} className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md">
                         ⚠ {tf('pendingDeduction', 'Pending Stitching')}
                       </span>
                     )
                   ) : (
-                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md whitespace-nowrap">
+                    <span style={{ whiteSpace: 'nowrap' }} className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md">
                       {tf('noVal', 'None')}
                     </span>
                   )}
@@ -317,12 +317,13 @@ export const OrderDetails = () => {
                 {order.assignedKarigar ? (
                   <Link
                     to={`/karigars/${order.assignedKarigar._id || order.assignedKarigar}`}
-                    className="px-3 py-1 bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20 text-xs font-bold rounded-xl hover:bg-color-accent-purple/20 transition-all whitespace-nowrap"
+                    style={{ whiteSpace: 'nowrap' }}
+                    className="px-3 py-1 bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20 text-xs font-bold rounded-xl hover:bg-color-accent-purple/20 transition-all"
                   >
                     {order.assignedKarigar.name || order.assignedKarigar} →
                   </Link>
                 ) : (
-                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md whitespace-nowrap">
+                  <span style={{ whiteSpace: 'nowrap' }} className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md">
                     {tf('unassigned', 'Unassigned')}
                   </span>
                 )}
@@ -344,11 +345,11 @@ export const OrderDetails = () => {
               </div>
               <div className="self-start sm:self-auto">
                 {order.assignedMachine ? (
-                  <span className="px-3 py-1 bg-color-accent-purple/15 text-color-accent-purple border border-color-accent-purple/25 text-xs font-black rounded-xl whitespace-nowrap">
+                  <span style={{ whiteSpace: 'nowrap' }} className="px-3 py-1 bg-color-accent-purple/15 text-color-accent-purple border border-color-accent-purple/25 text-xs font-black rounded-xl">
                     {order.assignedMachine.name || order.assignedMachine}
                   </span>
                 ) : (
-                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md whitespace-nowrap">
+                  <span style={{ whiteSpace: 'nowrap' }} className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md">
                     {tf('unassigned', 'Unassigned')}
                   </span>
                 )}
