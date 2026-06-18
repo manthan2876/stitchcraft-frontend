@@ -217,7 +217,9 @@ export const Orders = () => {
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">
                       {order.assignedKarigar ? (
-                        <span className="text-text-main font-semibold">{order.assignedKarigar.name || order.assignedKarigar}</span>
+                        <Link to={`/karigars/${order.assignedKarigar._id || order.assignedKarigar}`} className="text-color-accent-purple hover:underline font-semibold">
+                          {order.assignedKarigar.name || order.assignedKarigar}
+                        </Link>
                       ) : (
                         <span className="opacity-40 font-medium italic">{tf('unassigned', 'Unassigned')}</span>
                       )}

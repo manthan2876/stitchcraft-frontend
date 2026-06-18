@@ -1,5 +1,6 @@
 /* src/pages/Karigars.jsx */
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import Card from '../components/common/Card';
@@ -193,7 +194,9 @@ export const Karigars = () => {
                     {getInitials(karigar.name)}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-text-main group-hover:text-color-accent-purple transition-colors truncate max-w-[140px]">{karigar.name}</h4>
+                    <Link to={`/karigars/${karigar._id}`}>
+                      <h4 className="text-sm font-bold text-text-main group-hover:text-color-accent-purple transition-colors truncate max-w-[140px] hover:underline cursor-pointer">{karigar.name}</h4>
+                    </Link>
                     <span className="text-[10px] font-black text-text-muted uppercase tracking-wider">{tf('spec' + karigar.specialization, karigar.specialization)}</span>
                   </div>
                 </div>
