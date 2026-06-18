@@ -14,6 +14,14 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState(ProfileImage);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -26,6 +34,7 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
     };
     loadAvatar();
   }, [user]);
+
   return (
     <div className="h-[80px] px-4 sm:px-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary select-none print-hidden-element">
       {/* Title & Mobile Toggle */}
@@ -37,7 +46,7 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
         >
           <MdMenu className="w-5 h-5" />
         </button>
-        <h2 className="text-base sm:text-xl font-bold text-text-main tracking-wide truncate max-w-[150px] sm:max-w-none">{pageTitle}</h2>
+        <h2 className="text-sm sm:text-xl font-bold text-text-main tracking-wide truncate max-w-[100px] sm:max-w-none">{pageTitle}</h2>
       </div>
 
       {/* Center Search bar */}
@@ -51,17 +60,17 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
       </div>
 
       {/* Right widgets */}
-      <div className="flex items-center gap-3 sm:gap-6">
+      <div className="flex items-center gap-1.5 sm:gap-6">
         {/* Language Switcher */}
-        <div className="flex items-center gap-1 bg-bg-primary border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
+        <div className="flex items-center gap-1 bg-bg-primary border border-border-subtle rounded-xl px-2 py-1 sm:px-2.5 sm:py-1.5 shadow-sm">
           <select
             value={language}
             onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-transparent text-xs font-bold text-text-main outline-none cursor-pointer"
+            className="bg-transparent text-[10px] sm:text-xs font-bold text-text-main outline-none cursor-pointer"
           >
-            <option value="en" className="bg-bg-card">English (EN)</option>
-            <option value="gu" className="bg-bg-card">ગુજરાતી (GU)</option>
-            <option value="hi" className="bg-bg-card">हिन्दी (HI)</option>
+            <option value="en" className="bg-bg-card">{isMobile ? 'EN' : 'English (EN)'}</option>
+            <option value="gu" className="bg-bg-card">{isMobile ? 'GU' : 'ગુજરાતી (GU)'}</option>
+            <option value="hi" className="bg-bg-card">{isMobile ? 'HI' : 'हिन्दी (HI)'}</option>
           </select>
         </div>
 

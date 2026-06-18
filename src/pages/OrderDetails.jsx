@@ -245,7 +245,7 @@ export const OrderDetails = () => {
 
             {/* Lining / Astar Details */}
             <div className="flex flex-col gap-3 p-4 bg-bg-secondary border border-border-subtle rounded-2xl">
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-color-accent-pink/10 flex items-center justify-center text-color-accent-pink">
                     <MdOutlineInventory className="w-5 h-5" />
@@ -259,19 +259,19 @@ export const OrderDetails = () => {
                     </p>
                   </div>
                 </div>
-                <div>
+                <div className="self-start sm:self-auto">
                   {order.needsAster ? (
                     order.asterDeducted ? (
-                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">
+                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md whitespace-nowrap">
                         ✓ {tf('deducted', 'Stock Deducted')}
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md">
+                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md whitespace-nowrap">
                         ⚠ {tf('pendingDeduction', 'Pending Stitching')}
                       </span>
                     )
                   ) : (
-                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md">
+                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md whitespace-nowrap">
                       {tf('noVal', 'None')}
                     </span>
                   )}
@@ -301,7 +301,7 @@ export const OrderDetails = () => {
             </div>
 
             {/* Assigned Karigar */}
-            <div className="p-4 bg-bg-secondary border border-border-subtle rounded-2xl flex items-center justify-between gap-4">
+            <div className="p-4 bg-bg-secondary border border-border-subtle rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-color-accent-purple/10 flex items-center justify-center text-color-accent-purple">
                   <MdAssignmentInd className="w-5 h-5" />
@@ -313,16 +313,16 @@ export const OrderDetails = () => {
                   </p>
                 </div>
               </div>
-              <div>
+              <div className="self-start sm:self-auto">
                 {order.assignedKarigar ? (
                   <Link
                     to={`/karigars/${order.assignedKarigar._id || order.assignedKarigar}`}
-                    className="px-3 py-1 bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20 text-xs font-bold rounded-xl hover:bg-color-accent-purple/20 transition-all"
+                    className="px-3 py-1 bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20 text-xs font-bold rounded-xl hover:bg-color-accent-purple/20 transition-all whitespace-nowrap"
                   >
                     {order.assignedKarigar.name || order.assignedKarigar} →
                   </Link>
                 ) : (
-                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md">
+                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md whitespace-nowrap">
                     {tf('unassigned', 'Unassigned')}
                   </span>
                 )}
@@ -330,7 +330,7 @@ export const OrderDetails = () => {
             </div>
 
             {/* Assigned Machine */}
-            <div className="p-4 bg-bg-secondary border border-border-subtle rounded-2xl flex items-center justify-between gap-4">
+            <div className="p-4 bg-bg-secondary border border-border-subtle rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-color-accent-purple/10 flex items-center justify-center text-color-accent-purple">
                   <GiSewingMachine className="w-5.5 h-5.5 text-color-accent-purple" />
@@ -342,13 +342,13 @@ export const OrderDetails = () => {
                   </p>
                 </div>
               </div>
-              <div>
+              <div className="self-start sm:self-auto">
                 {order.assignedMachine ? (
-                  <span className="px-3 py-1 bg-color-accent-purple/15 text-color-accent-purple border border-color-accent-purple/25 text-xs font-black rounded-xl">
+                  <span className="px-3 py-1 bg-color-accent-purple/15 text-color-accent-purple border border-color-accent-purple/25 text-xs font-black rounded-xl whitespace-nowrap">
                     {order.assignedMachine.name || order.assignedMachine}
                   </span>
                 ) : (
-                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md">
+                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-md whitespace-nowrap">
                     {tf('unassigned', 'Unassigned')}
                   </span>
                 )}
@@ -358,11 +358,11 @@ export const OrderDetails = () => {
 
           {/* Customer Sizing / Maap Details */}
           <Card className="flex flex-col gap-5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between border-b border-border-subtle pb-3">
               <h3 className="text-sm font-black text-text-main uppercase tracking-wider">
                 📏 {tf('measurementsOrMaap', 'Measurements / Sizing')}
               </h3>
-              <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded bg-bg-secondary border border-border-subtle text-text-muted">
+              <span className="self-start sm:self-auto text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded bg-bg-secondary border border-border-subtle text-text-muted whitespace-nowrap">
                 {order.measurementType === 'Maap' ? '🧵 Custom Maap' : '📐 Dimensions'}
               </span>
             </div>
