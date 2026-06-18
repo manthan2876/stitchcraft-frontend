@@ -251,37 +251,37 @@ export const Ledger = () => {
               ) : (
                 journal.map((entry) => (
                   <tr key={entry._id} className="hover:bg-bg-hover transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-text-main">
+                    <td style={{ whiteSpace: 'nowrap' }} className="px-6 py-4 text-sm font-semibold text-text-main">
                       {formatDate(entry.date)}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main/90 max-w-xs md:max-w-md truncate">
                       {entry.description}
                     </td>
-                    <td className="px-6 py-4 text-xs font-semibold text-text-muted">
+                    <td style={{ whiteSpace: 'nowrap' }} className="px-6 py-4 text-xs font-semibold text-text-muted">
                       {getTypeLabel(entry.type)}
                     </td>
-                    <td className="px-6 py-4 text-xs font-medium text-text-muted">
+                    <td style={{ whiteSpace: 'nowrap' }} className="px-6 py-4 text-xs font-medium text-text-muted">
                       {entry.paymentMethod}
                     </td>
                     <td className="px-6 py-4 text-xs">
                       {entry.isReverted ? (
-                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                        <span style={{ whiteSpace: 'nowrap' }} className="inline-block px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
                           {tf('reverted', 'Reverted')}
                         </span>
                       ) : (
-                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
+                        <span style={{ whiteSpace: 'nowrap' }} className={`inline-block px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
                           {entry.flow === 'In' ? tf('inflow', 'In') : entry.flow === 'Out' ? tf('outflow', 'Out') : tf('nonCash', 'Non-Cash')}
                         </span>
                       )}
                     </td>
-                    <td className={`px-6 py-4 text-sm font-black text-right ${
+                    <td style={{ whiteSpace: 'nowrap' }} className={`px-6 py-4 text-sm font-black text-right ${
                       entry.isReverted
                         ? 'line-through text-text-muted opacity-50'
                         : (entry.flow === 'In' ? 'text-color-accent-emerald' : entry.flow === 'Out' ? 'text-color-accent-pink' : 'text-text-muted opacity-80')
                     }`}>
                       {entry.flow === 'In' ? '+' : entry.flow === 'Out' ? '-' : ''}{formatCurrency(entry.amount)}
                     </td>
-                    <td className="px-6 py-4 text-sm font-black text-right text-text-main">
+                    <td style={{ whiteSpace: 'nowrap' }} className="px-6 py-4 text-sm font-black text-right text-text-main">
                       {entry.flow === 'None' ? '—' : formatCurrency(entry.runningBalance)}
                     </td>
                   </tr>

@@ -88,12 +88,25 @@
     cursor: pointer;
   }
 
-  /* 7. Global Option styling for dropdown overlays */
+  /* Specific overrides for smaller selects, status selects, or language selects to prevent chevron overlap and keep layout tight */
+  select.px-2,
+  select.px-3,
+  select.px-4,
+  select.py-0\.5,
+  select.py-1,
+  select.py-1\.5,
+  select.text-\[10px\],
+  select.text-xs,
+  select.status-select {
+    padding-right: 1.5rem !important;
+    background-position: right 0.4rem center !important;
+    background-size: 0.7rem !important;
+  }
+
+  /* 7. Global Option styling for dropdown overlays - inherit font styles to match premium layout and keep menus clean */
   select option {
-    background-color: var(--color-bg-secondary) !important;
-    color: var(--color-text-main) !important;
-    font-size: 0.875rem;
-    padding: 8px 12px;
+    font-family: inherit !important;
+    font-size: inherit !important;
   }
 }
 
@@ -161,12 +174,6 @@ textarea {
   background-color: #ffffff;
   border-color: rgba(122, 96, 255, 0.2);
   color: #151329;
-}
-
-/* 7. Light theme select options */
-.light-theme select option {
-  background-color: #ffffff !important;
-  color: #151329 !important;
 }
 
 /* 8. Light theme chevron with adjusted stroke color */
