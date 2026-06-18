@@ -15,7 +15,7 @@ export const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
   const [selectedItem, setSelectedItem] = useState(null);
-  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10' });
+  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '' });
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
@@ -47,7 +47,7 @@ export const Inventory = () => {
   }, [searchTerm]);
 
   const handleOpenAddModal = () => {
-    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10' });
+    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '' });
     setModalMode('add');
     setSelectedItem(null);
     setFormError('');
@@ -59,7 +59,9 @@ export const Inventory = () => {
       itemName: item.itemName,
       quantity: String(item.quantity),
       unit: item.unit || 'meters',
-      minQuantity: String(item.minQuantity)
+      minQuantity: String(item.minQuantity),
+      purchaseAmount: '',
+      description: ''
     });
     setModalMode('edit');
     setSelectedItem(item);
@@ -80,7 +82,9 @@ export const Inventory = () => {
         itemName: form.itemName,
         quantity: Number(form.quantity) || 0,
         unit: form.unit,
-        minQuantity: Number(form.minQuantity) || 10
+        minQuantity: Number(form.minQuantity) || 10,
+        purchaseAmount: Number(form.purchaseAmount) || 0,
+        description: form.description || ''
       };
 
       if (modalMode === 'add') {
@@ -314,6 +318,31 @@ export const Inventory = () => {
                   placeholder="Low stock alert trigger (e.g. 10)"
                   className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('purchaseCost', 'Purchase Cost (₹)')}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.purchaseAmount}
+                    onChange={e => setForm({ ...form, purchaseAmount: e.target.value })}
+                    placeholder={tf('costPlaceholder', 'e.g. 1200')}
+                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('purchaseDescription', 'Description')}</label>
+                  <input
+                    type="text"
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                    placeholder={tf('descriptionPlaceholder', 'e.g. Supplier X roll')}
+                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
+                  />
+                </div>
               </div>
 
               {formError && (
