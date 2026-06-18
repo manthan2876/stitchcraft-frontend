@@ -11,6 +11,7 @@ import {
 import { FaWhatsapp } from 'react-icons/fa';
 import { GiSewingMachine } from 'react-icons/gi';
 import { useLanguage } from '../context/LanguageContext';
+import { getSignedUrl } from '../services/supabase';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 export const OrderDetails = () => {
@@ -19,6 +20,23 @@ export const OrderDetails = () => {
   const { t } = useLanguage();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [maapSignedUrl, setMaapSignedUrl] = useState('');
+
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      if (order && order.maapImageUrl) {
+        if (order.maapImageUrl.startsWith('http://') || order.maapImageUrl.startsWith('https://')) {
+          setMaapSignedUrl(order.maapImageUrl);
+        } else {
+          const url = await getSignedUrl('maap-images', order.maapImageUrl);
+          if (url) {
+            setMaapSignedUrl(url);
+          }
+        }
+      }
+    };
+    fetchSignedUrl();
+  }, [order]);
 
   // Payment Modal states
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -325,11 +343,11 @@ export const OrderDetails = () => {
 
             {order.measurementType === 'Maap' ? (
               <div className="flex flex-col items-center justify-center py-6 border-2 border-dashed border-border-subtle rounded-2xl gap-3 text-center">
-                {order.maapImageUrl ? (
+                {maapSignedUrl ? (
                   <div className="relative group max-w-sm rounded-xl overflow-hidden shadow-md">
-                    <img src={order.maapImageUrl} alt="Maap Pattern" className="max-h-80 object-contain mx-auto" />
+                    <img src={maapSignedUrl} alt="Maap Pattern" className="max-h-80 object-contain mx-auto" />
                     <a
-                      href={order.maapImageUrl}
+                      href={maapSignedUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white-forced font-bold text-xs transition-opacity cursor-pointer"
