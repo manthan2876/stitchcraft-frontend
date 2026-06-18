@@ -3,18 +3,28 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Enforce light theme strictly for steps 1-13 as requested
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('stitchcraft_theme');
+    // Default to dark mode to keep the original wow-factor aesthetics as default
+    return saved === 'light' ? 'light' : 'dark';
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.add('light-theme');
-    root.classList.remove('dark');
-    root.setAttribute('data-theme', 'light');
-  }, []);
+    if (theme === 'light') {
+      root.classList.add('light-theme');
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+    } else {
+      root.classList.remove('light-theme');
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+    }
+    localStorage.setItem('stitchcraft_theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
-    console.log('Theme toggle is disabled until Theme Management is implemented.');
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (

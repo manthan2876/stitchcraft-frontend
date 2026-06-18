@@ -1,12 +1,14 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { MdSearch, MdMenu } from 'react-icons/md';
+import { MdSearch, MdMenu, MdWbSunny, MdNightsStay } from 'react-icons/md';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import ProfileImage from '../../assets/profile.png';
 
 export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
@@ -48,6 +50,19 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
             <option value="hi" className="bg-bg-card">हिन्दी (HI)</option>
           </select>
         </div>
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-xl hover:bg-bg-hover flex items-center justify-center border border-border-subtle text-text-muted hover:text-text-main transition-all cursor-pointer bg-bg-primary shadow-sm"
+          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+        >
+          {theme === 'light' ? (
+            <MdWbSunny className="w-5 h-5 text-amber-500" />
+          ) : (
+            <MdNightsStay className="w-5 h-5 text-purple-400" />
+          )}
+        </button>
 
         {/* Divider */}
         <div className="h-6 sm:h-8 w-[1px] bg-border-subtle" />
