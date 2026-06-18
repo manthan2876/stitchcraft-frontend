@@ -108,6 +108,57 @@
     font-family: inherit !important;
     font-size: inherit !important;
   }
+
+  /* Premium tactile transitions, hover, and focus ring styling for all select dropdowns */
+  select {
+    transition: all 0.2s ease-in-out !important;
+  }
+
+  select:hover {
+    border-color: rgba(122, 96, 255, 0.4) !important;
+    background-color: var(--color-bg-hover) !important;
+  }
+
+  select:focus {
+    border-color: var(--color-accent-purple) !important;
+    box-shadow: 0 0 0 3px rgba(122, 96, 255, 0.15) !important;
+    outline: none !important;
+  }
+
+  /* Mobile-specific size reductions (width < 640px) */
+  @media (max-width: 639px) {
+    /* Scale down standard form selects */
+    select {
+      font-size: 0.75rem !important;
+      padding-top: 0.45rem !important;
+      padding-bottom: 0.45rem !important;
+      padding-right: 1.75rem !important;
+      background-position: right 0.5rem center !important;
+      background-size: 0.7rem !important;
+      border-radius: 8px !important;
+    }
+
+    /* Scale down compact selects (status tags, language switcher, table selects) even further on mobile */
+    select.px-2,
+    select.px-3,
+    select.px-4,
+    select.py-0\.5,
+    select.py-1,
+    select.py-1\.5,
+    select.text-\[10px\],
+    select.text-xs,
+    select.status-select,
+    .topbar-icon-btn select {
+      font-size: 9px !important;
+      padding-left: 0.35rem !important;
+      padding-right: 1.15rem !important;
+      padding-top: 0.25rem !important;
+      padding-bottom: 0.25rem !important;
+      background-position: right 0.25rem center !important;
+      background-size: 0.6rem !important;
+      border-radius: 6px !important;
+    }
+  }
 }
 
 /* Color Scheme support */
@@ -179,6 +230,16 @@ textarea {
 /* 8. Light theme chevron with adjusted stroke color */
 .light-theme select {
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23625f82' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+}
+
+.light-theme select:hover {
+  border-color: rgba(122, 96, 255, 0.5) !important;
+  background-color: rgba(122, 96, 255, 0.03) !important;
+}
+
+.light-theme select:focus {
+  border-color: var(--color-accent-purple) !important;
+  box-shadow: 0 0 0 3px rgba(122, 96, 255, 0.12) !important;
 }
 
 /* Global Placeholder Override */
