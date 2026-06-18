@@ -88,29 +88,46 @@ export const PublicInvoice = () => {
 
   return (
     <div className="w-screen min-h-screen bg-bg-primary p-4 sm:p-8 select-none text-left">
-      {/* Print-specific style override */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * {
-            visibility: hidden;
+          /* Hide sidebar, topbar, buttons, back links, and other non-print elements */
+          .print-hidden-element, button, a {
+            display: none !important;
           }
-          #printable-invoice, #printable-invoice * {
-            visibility: visible;
-          }
-          #printable-invoice {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+          
+          /* Reset root layout structural limits to let content flow naturally on paper */
+          html, body, #root, #root > div, main {
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            position: static !important;
             background: white !important;
             color: black !important;
-            padding: 0 !important;
+            width: 100% !important;
             margin: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
+            padding: 0 !important;
           }
-          .print-hidden-element {
-            display: none !important;
+          
+          /* Style the printable invoice card container specifically for paper output */
+          #printable-invoice {
+            visibility: visible !important;
+            display: flex !important;
+            flex-direction: column !important;
+            background: white !important;
+            color: black !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 2cm !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            position: static !important;
+          }
+          
+          /* Ensure all text inside invoice displays properly */
+          #printable-invoice * {
+            visibility: visible !important;
+            color: black !important;
           }
         }
       `}} />

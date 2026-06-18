@@ -39,7 +39,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
   ];
 
   return (
-    <div className={`fixed inset-y-0 left-0 z-50 w-[260px] h-screen bg-bg-sidebar border-r border-border-subtle flex flex-col justify-between pt-8 pb-6 select-none shrink-0 transition-transform duration-300 lg:static lg:translate-x-0 overflow-hidden lg:overflow-visible
+    <div className={`fixed inset-y-0 left-0 z-50 w-[260px] h-screen bg-bg-sidebar border-r border-border-subtle flex flex-col justify-between pt-8 pb-6 select-none shrink-0 transition-transform duration-300 lg:static lg:translate-x-0 overflow-hidden lg:overflow-visible print-hidden-element
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       <div>

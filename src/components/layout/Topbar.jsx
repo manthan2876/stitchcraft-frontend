@@ -27,7 +27,7 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
     loadAvatar();
   }, [user]);
   return (
-    <div className="h-[80px] px-4 sm:px-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary select-none">
+    <div className="h-[80px] px-4 sm:px-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary select-none print-hidden-element">
       {/* Title & Mobile Toggle */}
       <div className="flex items-center">
         <button
