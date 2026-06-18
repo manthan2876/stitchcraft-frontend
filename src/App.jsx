@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Customers from './pages/Customers';
+import CustomerDetails from './pages/CustomerDetails';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -25,6 +27,8 @@ export const App = () => {
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/customers" element={<Customers />} />
+                <Route path="/customers/:id" element={<CustomerDetails />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 

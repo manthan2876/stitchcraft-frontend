@@ -25,11 +25,11 @@ export const AppLayout = () => {
   }
 
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/dashboard':    return t('dashboard');
-      case '/profile':      return t('profile');
-      default:              return "Tailor's App ERP";
-    }
+    if (location.pathname === '/dashboard') return t('dashboard');
+    if (location.pathname === '/profile') return t('profile');
+    if (location.pathname === '/customers') return t('customerRegistry') !== 'customerRegistry' ? t('customerRegistry') : 'Customer Registry';
+    if (location.pathname.startsWith('/customers/')) return 'Customer Details';
+    return "Tailor's App ERP";
   };
 
   return (
