@@ -96,9 +96,9 @@ export const Ledger = () => {
   const cashInHand = Math.max(0, summary.totalReceived - summary.totalExpenses);
 
   const getFlowBadgeClass = (flow) => {
-    return flow === 'In'
-      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-      : 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
+    if (flow === 'In') return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
+    if (flow === 'Out') return 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
+    return 'bg-gray-500/10 text-gray-500 border border-gray-500/20';
   };
 
   const getTypeLabel = (type) => {
@@ -264,13 +264,13 @@ export const Ledger = () => {
                     </td>
                     <td className="px-6 py-4 text-xs">
                       <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
-                        {entry.flow === 'In' ? tf('inflow', 'In') : tf('outflow', 'Out')}
+                        {entry.flow === 'In' ? tf('inflow', 'In') : entry.flow === 'Out' ? tf('outflow', 'Out') : tf('nonCash', 'Non-Cash')}
                       </span>
                     </td>
                     <td className={`px-6 py-4 text-sm font-black text-right ${
-                      entry.flow === 'In' ? 'text-color-accent-emerald' : 'text-color-accent-pink'
+                      entry.flow === 'In' ? 'text-color-accent-emerald' : entry.flow === 'Out' ? 'text-color-accent-pink' : 'text-text-muted opacity-80'
                     }`}>
-                      {entry.flow === 'In' ? '+' : '-'}{formatCurrency(entry.amount)}
+                      {entry.flow === 'In' ? '+' : entry.flow === 'Out' ? '-' : ''}{formatCurrency(entry.amount)}
                     </td>
                   </tr>
                 ))
