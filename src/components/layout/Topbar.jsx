@@ -95,7 +95,7 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
               {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-bg-card flex items-center justify-center shadow-lg transition-all">
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-color-accent-purple/10 flex items-center justify-center shadow-lg transition-all">
             {avatarUrl ? (
               <img src={avatarUrl} className="w-full h-full object-cover" alt="Profile" />
             ) : (

@@ -5,12 +5,44 @@
 
 /* 1. Map design tokens to Tailwind v4 utilities */
 @theme {
-  --color-secondary: var(--color-bg-secondary);
+  --color-bg-primary: var(--color-bg-primary);
   --color-bg-secondary: var(--color-bg-secondary);
+  --color-secondary: var(--color-bg-secondary);
+  --color-bg-sidebar: var(--color-bg-sidebar);
+  --color-bg-card: var(--color-bg-card);
+  --color-bg-card-hover: var(--color-bg-card-hover);
+  --color-bg-input: var(--color-bg-input);
+  --color-bg-modal: var(--color-bg-modal);
+  --color-bg-hover: var(--color-bg-hover);
+
+  --color-text-main: var(--color-text-main);
   --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-dark: var(--color-text-dark);
+
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-medium: var(--color-border-medium);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-accent-purple: var(--color-accent-purple);
+  --color-accent-purple-hover: var(--color-accent-purple-hover);
+  --color-accent-pink: var(--color-accent-pink);
+  --color-accent-blue: var(--color-accent-blue);
+  --color-accent-cyan: var(--color-accent-cyan);
+  --color-accent-emerald: var(--color-accent-emerald);
+  --color-accent-amber: var(--color-accent-amber);
+
+  --color-color-accent-purple: var(--color-color-accent-purple);
+  --color-color-accent-pink: var(--color-color-accent-pink);
+  --color-color-accent-blue: var(--color-color-accent-blue);
+  --color-color-accent-cyan: var(--color-color-accent-cyan);
+  --color-color-accent-emerald: var(--color-color-accent-emerald);
+  --color-color-accent-amber: var(--color-color-accent-amber);
+
   --shadow-card: var(--shadow-card);
   --font-sans: "Outfit", "Inter", sans-serif;
 }
+
 
 :root {
   color-scheme: dark;
@@ -153,8 +185,43 @@ textarea {
   opacity: 0.65;
 }
 
+.delivery-active-tab {
+  background-color: rgba(70, 95, 255, 0.15) !important;
+  border-color: var(--color-accent-purple) !important;
+  color: #7592ff !important;
+}
+
 /* ─── Light Theme Overrides ─── */
 .light-theme {
+
+  /* Prevent secondary / cancel / action buttons from blending in light theme */
+  .btn-tactile-secondary,
+  button.bg-bg-secondary,
+  button.bg-secondary,
+  button.bg-bg-card,
+  button.bg-bg-primary,
+  a.bg-bg-secondary,
+  a.bg-secondary,
+  a.bg-bg-card,
+  a.bg-bg-primary {
+    background-color: #f4f3ff !important;
+    border: 1px solid #dcd7ff !important;
+    color: #3b3880 !important;
+  }
+
+  .btn-tactile-secondary:hover,
+  button.bg-bg-secondary:hover,
+  button.bg-secondary:hover,
+  button.bg-bg-card:hover,
+  button.bg-bg-primary:hover,
+  a.bg-bg-secondary:hover,
+  a.bg-secondary:hover,
+  a.bg-bg-card:hover,
+  a.bg-bg-primary:hover {
+    background-color: #ebe9ff !important;
+    border-color: #7a60ff !important;
+    color: #1e1a5a !important;
+  }
 
   /* 6. Light Theme overrides for missing hex targets */
   .bg-\[\#17152d\] {
@@ -180,6 +247,7 @@ textarea {
   .text-white-forced * {
     color: #ffffff !important;
   }
+
 
   .border-white\/5,
   .border-white\/10,

@@ -52,7 +52,7 @@ export const CustomerList = ({ customers, selectedCustomerId, onSelectCustomer, 
                 <div className="flex items-center gap-3">
                   {/* Avatar Circle */}
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shadow-md
-                    ${isSelected ? 'bg-color-accent-purple text-white-forced' : 'bg-bg-input text-text-muted'}`}
+                    ${isSelected ? 'bg-color-accent-purple text-white-forced' : 'bg-bg-hover text-text-muted'}`}
                   >
                     {cust.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                   </div>

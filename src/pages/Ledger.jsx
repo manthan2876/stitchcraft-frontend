@@ -93,7 +93,7 @@ export const Ledger = () => {
     window.print();
   };
 
-  const cashInHand = Math.max(0, summary.totalReceived - summary.totalExpenses);
+  const cashInHand = summary.totalReceived - summary.totalExpenses;
 
   const getFlowBadgeClass = (flow) => {
     if (flow === 'In') return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
@@ -232,18 +232,19 @@ export const Ledger = () => {
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('method', 'Method')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('flow', 'Flow')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">{tf('amount', 'Amount')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">{tf('balance', 'Balance')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('syncingLedger', 'Syncing ledger audit entries...')}
                   </td>
                 </tr>
               ) : journal.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('noLedgerRecords', 'No ledger journal entries found.')}
                   </td>
                 </tr>
@@ -263,14 +264,25 @@ export const Ledger = () => {
                       {entry.paymentMethod}
                     </td>
                     <td className="px-6 py-4 text-xs">
-                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
-                        {entry.flow === 'In' ? tf('inflow', 'In') : entry.flow === 'Out' ? tf('outflow', 'Out') : tf('nonCash', 'Non-Cash')}
-                      </span>
+                      {entry.isReverted ? (
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                          {tf('reverted', 'Reverted')}
+                        </span>
+                      ) : (
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
+                          {entry.flow === 'In' ? tf('inflow', 'In') : entry.flow === 'Out' ? tf('outflow', 'Out') : tf('nonCash', 'Non-Cash')}
+                        </span>
+                      )}
                     </td>
                     <td className={`px-6 py-4 text-sm font-black text-right ${
-                      entry.flow === 'In' ? 'text-color-accent-emerald' : entry.flow === 'Out' ? 'text-color-accent-pink' : 'text-text-muted opacity-80'
+                      entry.isReverted
+                        ? 'line-through text-text-muted opacity-50'
+                        : (entry.flow === 'In' ? 'text-color-accent-emerald' : entry.flow === 'Out' ? 'text-color-accent-pink' : 'text-text-muted opacity-80')
                     }`}>
                       {entry.flow === 'In' ? '+' : entry.flow === 'Out' ? '-' : ''}{formatCurrency(entry.amount)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-black text-right text-text-main">
+                      {entry.flow === 'None' ? '—' : formatCurrency(entry.runningBalance)}
                     </td>
                   </tr>
                 ))

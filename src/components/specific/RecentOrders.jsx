@@ -9,7 +9,7 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered'];
+  const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
 
   const filteredOrders = orders.filter(o => {
     const matchesSearch = o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -28,7 +28,8 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
       case 'Checking': return { text: '#ec4899', bg: 'rgba(236,72,153,0.1)' };
       case 'Ready': return { text: '#10b981', bg: 'rgba(16,185,129,0.1)' };
       case 'Delivered': return { text: '#9ca3af', bg: 'rgba(156,163,175,0.1)' };
-      default: return { text: 'var(--color-text-main)', bg: 'rgba(255,255,255,0.1)' };
+      case 'Cancelled': return { text: '#f43f5e', bg: 'rgba(244,63,94,0.1)' };
+      default: return { text: '#9ca3af', bg: 'rgba(156,163,175,0.1)' };
     }
   };
 

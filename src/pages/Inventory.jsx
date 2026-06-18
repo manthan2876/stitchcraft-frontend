@@ -14,9 +14,9 @@ export const Inventory = () => {
 
   // Add/Edit Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit'
+  const [modalMode, setModalMode] = useState('add'); // 'add' | 'edit' | 'restock'
   const [selectedItem, setSelectedItem] = useState(null);
-  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '' });
+  const [form, setForm] = useState({ itemName: '', quantity: '', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '', quantityToAdd: '' });
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
@@ -48,7 +48,7 @@ export const Inventory = () => {
   }, [searchTerm]);
 
   const handleOpenAddModal = () => {
-    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '0' });
+    setForm({ itemName: '', quantity: '0', unit: 'meters', minQuantity: '10', purchaseAmount: '', description: '', costPerUnit: '0', quantityToAdd: '' });
     setModalMode('add');
     setSelectedItem(null);
     setFormError('');
@@ -63,7 +63,8 @@ export const Inventory = () => {
       minQuantity: String(item.minQuantity),
       purchaseAmount: '',
       description: '',
-      costPerUnit: String(item.costPerUnit || 0)
+      costPerUnit: String(item.costPerUnit || 0),
+      quantityToAdd: ''
     });
     setModalMode('edit');
     setSelectedItem(item);
@@ -71,29 +72,72 @@ export const Inventory = () => {
     setIsModalOpen(true);
   };
 
+  const handleOpenRestockModal = (item) => {
+    setForm({
+      itemName: item.itemName,
+      quantity: String(item.quantity),
+      unit: item.unit || 'meters',
+      minQuantity: String(item.minQuantity),
+      purchaseAmount: '',
+      description: '',
+      costPerUnit: String(item.costPerUnit || 0),
+      quantityToAdd: ''
+    });
+    setModalMode('restock');
+    setSelectedItem(item);
+    setFormError('');
+    setIsModalOpen(true);
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!form.itemName) {
+    if (modalMode !== 'restock' && !form.itemName) {
       setFormError(tf('itemNameRequired', 'Item name is required.'));
+      return;
+    }
+    if (modalMode === 'restock' && (!form.quantityToAdd || Number(form.quantityToAdd) <= 0)) {
+      setFormError(tf('quantityToAddRequired', 'Please enter a valid quantity to add.'));
       return;
     }
     setFormLoading(true);
     setFormError('');
     try {
-      const payload = {
-        itemName: form.itemName,
-        quantity: Number(form.quantity) || 0,
-        unit: form.unit,
-        minQuantity: Number(form.minQuantity) || 10,
-        purchaseAmount: Number(form.purchaseAmount) || 0,
-        description: form.description || '',
-        costPerUnit: Number(form.costPerUnit) || 0
-      };
-
+      let payload;
       if (modalMode === 'add') {
+        payload = {
+          itemName: form.itemName,
+          quantity: Number(form.quantity) || 0,
+          unit: form.unit,
+          minQuantity: Number(form.minQuantity) || 10,
+          purchaseAmount: Number(form.purchaseAmount) || 0,
+          description: form.description || '',
+          costPerUnit: Number(form.costPerUnit) || 0
+        };
         const data = await api.post('/inventory', payload);
         setItems(prev => [data, ...prev]);
-      } else {
+      } else if (modalMode === 'edit') {
+        payload = {
+          itemName: form.itemName,
+          quantity: Number(form.quantity) || 0,
+          unit: form.unit,
+          minQuantity: Number(form.minQuantity) || 10,
+          purchaseAmount: 0, // Explicitly 0 so detail editing doesn't log a restocking entry
+          description: '',
+          costPerUnit: Number(form.costPerUnit) || 0
+        };
+        const data = await api.put(`/inventory/${selectedItem._id}`, payload);
+        setItems(prev => prev.map(item => item._id === data._id ? data : item));
+      } else if (modalMode === 'restock') {
+        const addedQty = Number(form.quantityToAdd) || 0;
+        payload = {
+          itemName: selectedItem.itemName,
+          quantity: selectedItem.quantity + addedQty,
+          unit: selectedItem.unit,
+          minQuantity: selectedItem.minQuantity,
+          purchaseAmount: Number(form.purchaseAmount) || 0,
+          description: form.description || `Restocked ${addedQty} ${form.unit} of ${selectedItem.itemName}`,
+          costPerUnit: Number(form.costPerUnit) || 0
+        };
         const data = await api.put(`/inventory/${selectedItem._id}`, payload);
         setItems(prev => prev.map(item => item._id === data._id ? data : item));
       }
@@ -234,16 +278,23 @@ export const Inventory = () => {
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
+                          onClick={() => handleOpenRestockModal(item)}
+                          className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 hover:text-emerald-600 transition-all cursor-pointer border border-emerald-500/10"
+                          title={tf('restockMaterial', 'Restock Material')}
+                        >
+                          <MdAdd className="w-4 h-4 text-color-accent-emerald" />
+                        </button>
+                        <button
                           onClick={() => handleOpenEditModal(item)}
                           className="p-1.5 rounded-lg bg-bg-secondary hover:bg-bg-card-hover border border-border-subtle text-text-muted hover:text-text-main transition-all cursor-pointer"
-                          title="Edit Details"
+                          title={tf('editDetails', 'Edit Details')}
                         >
                           <MdEdit className="w-4 h-4 text-color-accent-purple" />
                         </button>
                         <button
                           onClick={() => { setDeleteTarget(item); setDeleteError(''); }}
                           className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-600 transition-all cursor-pointer border border-rose-500/10"
-                          title="Delete Item"
+                          title={tf('deleteMaterial', 'Delete Material')}
                         >
                           <MdDelete className="w-4 h-4 text-color-accent-pink" />
                         </button>
@@ -270,104 +321,143 @@ export const Inventory = () => {
 
             <h3 className="text-lg font-black text-text-main flex items-center gap-2 mb-1">
               <MdInventory className="text-color-accent-purple w-5 h-5" />
-              {modalMode === 'add' ? tf('addInventoryItem', 'Add Inventory Item') : tf('editInventoryDetails', 'Edit Inventory Details')}
+              {modalMode === 'add' ? tf('addInventoryItem', 'Add Inventory Item') : modalMode === 'edit' ? tf('editInventoryDetails', 'Edit Inventory Details') : tf('restockMaterial', 'Restock Material')}
             </h3>
             <p className="text-xs text-text-muted mb-5 font-semibold">
-              {modalMode === 'add' ? tf('addInventoryItemDesc', 'Register new materials to your workshop inventory.') : tf('editInventoryDetailsDesc', 'Update material counts, units, and alert thresholds.')}
+              {modalMode === 'add' 
+                ? tf('addInventoryItemDesc', 'Register new materials to your workshop inventory.') 
+                : modalMode === 'edit'
+                ? tf('editInventoryDetailsDesc', 'Update material counts, units, and alert thresholds.')
+                : tf('restockMaterialDesc', 'Add restocking quantities and record expense in ledger.')}
             </p>
 
             <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('itemName', 'Item Name')}</label>
-                <input
-                  type="text"
-                  required
-                  value={form.itemName}
-                  onChange={e => { setForm({ ...form, itemName: e.target.value }); setFormError(''); }}
-                  placeholder={tf('itemNamePlaceholder', 'e.g. Silk, Velvet fabric, Cotton Thread')}
-                  className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all placeholder:text-text-muted/50"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              {modalMode !== 'restock' && (
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('quantity', 'Quantity')}</label>
+                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('itemName', 'Item Name')}</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.itemName}
+                    onChange={e => { setForm({ ...form, itemName: e.target.value }); setFormError(''); }}
+                    placeholder={tf('itemNamePlaceholder', 'e.g. Silk, Velvet fabric, Cotton Thread')}
+                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all placeholder:text-text-muted/50"
+                  />
+                </div>
+              )}
+
+              {modalMode === 'restock' && (
+                <div className="flex flex-col gap-1 bg-bg-secondary p-3 border border-border-subtle rounded-xl mb-2">
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('restockingItem', 'Restocking Item')}</span>
+                  <span className="text-sm font-black text-text-main mt-0.5">{selectedItem?.itemName}</span>
+                  <span className="text-[10px] text-text-muted mt-0.5">{tf('stockLevel', 'Stock Level')}: {selectedItem?.quantity} {tf(selectedItem?.unit, selectedItem?.unit)}</span>
+                </div>
+              )}
+
+              {modalMode === 'restock' ? (
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('quantityToAdd', 'Quantity to Add')}</label>
                   <input
                     type="number"
                     required
-                    min="0"
-                    value={form.quantity}
-                    onChange={e => setForm({ ...form, quantity: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
+                    min="0.01"
+                    step="any"
+                    value={form.quantityToAdd}
+                    onChange={e => setForm({ ...form, quantityToAdd: e.target.value })}
+                    placeholder={`e.g. 50 (in ${form.unit})`}
+                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
                   />
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('quantity', 'Quantity')}</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      step="any"
+                      value={form.quantity}
+                      onChange={e => setForm({ ...form, quantity: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
+                    />
+                  </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('unitType', 'Unit Type')}</label>
-                  <select
-                    value={form.unit}
-                    onChange={e => setForm({ ...form, unit: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all cursor-pointer font-bold"
-                  >
-                    <option value="meters" className="bg-bg-card">{tf('meters', 'Meters')}</option>
-                    <option value="pieces" className="bg-bg-card">{tf('pieces', 'Pieces')}</option>
-                    <option value="rolls" className="bg-bg-card">{tf('rolls', 'Rolls')}</option>
-                    <option value="yards" className="bg-bg-card">{tf('yards', 'Yards')}</option>
-                    <option value="packs" className="bg-bg-card">{tf('packs', 'Packs')}</option>
-                  </select>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('unitType', 'Unit Type')}</label>
+                    <select
+                      value={form.unit}
+                      onChange={e => setForm({ ...form, unit: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all cursor-pointer font-bold"
+                    >
+                      <option value="meters" className="bg-bg-card">{tf('meters', 'Meters')}</option>
+                      <option value="pieces" className="bg-bg-card">{tf('pieces', 'Pieces')}</option>
+                      <option value="rolls" className="bg-bg-card">{tf('rolls', 'Rolls')}</option>
+                      <option value="yards" className="bg-bg-card">{tf('yards', 'Yards')}</option>
+                      <option value="packs" className="bg-bg-card">{tf('packs', 'Packs')}</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('minThresholdAlert', 'Min Threshold Alert')}</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={form.minQuantity}
-                  onChange={e => setForm({ ...form, minQuantity: e.target.value })}
-                  placeholder="Low stock alert trigger (e.g. 10)"
-                  className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
-                />
-              </div>
+              {modalMode !== 'restock' && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('minThresholdAlert', 'Min Threshold Alert')}</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={form.minQuantity}
+                      onChange={e => setForm({ ...form, minQuantity: e.target.value })}
+                      placeholder="Low stock alert trigger (e.g. 10)"
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
+                    />
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('costPerUnit', 'Cost Price per Unit (₹)')}</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={form.costPerUnit}
-                  onChange={e => setForm({ ...form, costPerUnit: e.target.value })}
-                  placeholder={tf('costPerUnitPlaceholder', 'e.g. 30')}
-                  className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
-                />
-              </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('costPerUnit', 'Cost Price per Unit (₹)')}</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={form.costPerUnit}
+                      onChange={e => setForm({ ...form, costPerUnit: e.target.value })}
+                      placeholder={tf('costPerUnitPlaceholder', 'e.g. 30')}
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
+                    />
+                  </div>
+                </>
+              )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('purchaseCost', 'Purchase Cost (₹)')}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.purchaseAmount}
-                    onChange={e => setForm({ ...form, purchaseAmount: e.target.value })}
-                    placeholder={tf('costPlaceholder', 'e.g. 1200')}
-                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
-                  />
+              {(modalMode === 'add' || modalMode === 'restock') && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                      {modalMode === 'restock' ? tf('restockCost', 'Restock Cost (₹)') : tf('purchaseCost', 'Purchase Cost (₹)')}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={form.purchaseAmount}
+                      onChange={e => setForm({ ...form, purchaseAmount: e.target.value })}
+                      placeholder={tf('costPlaceholder', 'e.g. 1200')}
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('purchaseDescription', 'Description')}</label>
+                    <input
+                      type="text"
+                      value={form.description}
+                      onChange={e => setForm({ ...form, description: e.target.value })}
+                      placeholder={tf('descriptionPlaceholder', 'e.g. Supplier X roll')}
+                      className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all font-semibold"
+                    />
+                  </div>
                 </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('purchaseDescription', 'Description')}</label>
-                  <input
-                    type="text"
-                    value={form.description}
-                    onChange={e => setForm({ ...form, description: e.target.value })}
-                    placeholder={tf('descriptionPlaceholder', 'e.g. Supplier X roll')}
-                    className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all"
-                  />
-                </div>
-              </div>
+              )}
 
               {formError && (
                 <span className="text-xs text-color-accent-pink font-bold text-center animate-pulse">

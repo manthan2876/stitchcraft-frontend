@@ -2,7 +2,11 @@ import { CURRENCY_SYMBOL } from '../config/constants';
 
 export const formatCurrency = (value) => {
   if (value === undefined || value === null) return `${CURRENCY_SYMBOL}0`;
-  return `${CURRENCY_SYMBOL}${Number(value).toLocaleString('en-IN')}`;
+  const num = Number(value);
+  if (num < 0) {
+    return `-${CURRENCY_SYMBOL}${Math.abs(num).toLocaleString('en-IN')}`;
+  }
+  return `${CURRENCY_SYMBOL}${num.toLocaleString('en-IN')}`;
 };
 
 export const formatDate = (date) => {

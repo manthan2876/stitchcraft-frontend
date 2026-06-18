@@ -134,13 +134,15 @@ export const OrderDetails = () => {
     );
   }
 
+  const asterPrice = order.needsAster ? ((order.asterSellingPrice || 0) * (order.asterQuantity || 0)) : 0;
+  const totalValue = order.price + asterPrice;
   const balanceAmount = order.payment
     ? Math.max(0, order.payment.totalAmount - order.payment.paidAmount)
-    : order.price;
+    : totalValue;
 
   const isFullyPaid = balanceAmount === 0;
 
-  const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered'];
+  const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -151,6 +153,7 @@ export const OrderDetails = () => {
       case 'Checking': return 'bg-pink-500/10 text-pink-500 border border-pink-500/20';
       case 'Ready': return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
       case 'Delivered': return 'bg-gray-500/10 text-gray-500 border border-gray-500/20';
+      case 'Cancelled': return 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
       default: return 'bg-bg-hover text-text-muted border border-border-subtle';
     }
   };

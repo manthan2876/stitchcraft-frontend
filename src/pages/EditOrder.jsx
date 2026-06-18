@@ -52,7 +52,7 @@ export const EditOrder = () => {
         });
     }, []);
 
-    const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered'];
+    const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
 
     useEffect(() => {
         const fetchOrder = async () => {

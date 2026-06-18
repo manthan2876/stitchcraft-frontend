@@ -70,11 +70,11 @@ export const Orders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(() => {
     const s = searchParams.get('status');
-    const valid = ['All', 'Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered'];
+    const valid = ['All', 'Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
     return valid.includes(s) ? s : 'All';
   });
 
-  const statusList = ['All', 'Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered'];
+  const statusList = ['All', 'Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
@@ -85,6 +85,7 @@ export const Orders = () => {
       case 'Checking': return 'bg-pink-500/10 text-pink-500 border-pink-500/20';
       case 'Ready': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
       case 'Delivered': return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+      case 'Cancelled': return 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
       default: return 'bg-bg-hover text-text-muted border border-border-subtle';
     }
   };

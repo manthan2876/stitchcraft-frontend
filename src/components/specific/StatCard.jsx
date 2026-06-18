@@ -12,11 +12,11 @@ export const StatCard = ({
   let iconWrapperClass = 'text-text-muted bg-bg-hover';
 
   if (variant === 'purple' || variant === 'blue') {
-    iconWrapperClass = 'text-brand-500 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/12';
+    iconWrapperClass = 'text-color-accent-purple bg-color-accent-purple/10';
   } else if (variant === 'pink') {
-    iconWrapperClass = 'text-rose-500 dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/12';
+    iconWrapperClass = 'text-color-accent-pink bg-color-accent-pink/10';
   } else if (variant === 'emerald') {
-    iconWrapperClass = 'text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/12';
+    iconWrapperClass = 'text-color-accent-emerald bg-color-accent-emerald/10';
   }
 
   const clickableClass = onClick
