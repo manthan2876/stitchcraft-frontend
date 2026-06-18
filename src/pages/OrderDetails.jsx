@@ -241,37 +241,60 @@ export const OrderDetails = () => {
             </div>
 
             {/* Lining / Astar Details */}
-            <div className="p-4 bg-bg-secondary border border-border-subtle rounded-2xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-color-accent-pink/10 flex items-center justify-center text-color-accent-pink">
-                  <MdOutlineInventory className="w-5 h-5" />
+            <div className="flex flex-col gap-3 p-4 bg-bg-secondary border border-border-subtle rounded-2xl">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-color-accent-pink/10 flex items-center justify-center text-color-accent-pink">
+                    <MdOutlineInventory className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-text-main">{tf('astarLining', 'Lining / Astar Material')}</h4>
+                    <p className="text-[10px] text-text-muted font-medium mt-0.5">
+                      {order.needsAster
+                        ? `${tf('required', 'Required')}: ${order.asterQuantity} ${order.asterInventoryItem?.unit || 'meters'}`
+                        : tf('notRequired', 'No lining needed')}
+                    </p>
+                  </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-main">{tf('astarLining', 'Lining / Astar Material')}</h4>
-                  <p className="text-[10px] text-text-muted font-medium mt-0.5">
-                    {order.needsAster
-                      ? `${tf('required', 'Required')}: ${order.asterQuantity} meters`
-                      : tf('notRequired', 'No lining needed')}
-                  </p>
+                  {order.needsAster ? (
+                    order.asterDeducted ? (
+                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">
+                        ✓ {tf('deducted', 'Stock Deducted')}
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md">
+                        ⚠ {tf('pendingDeduction', 'Pending Stitching')}
+                      </span>
+                    )
+                  ) : (
+                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md">
+                      {tf('noVal', 'None')}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div>
-                {order.needsAster ? (
-                  order.asterDeducted ? (
-                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md">
-                      ✓ {tf('deducted', 'Stock Deducted')}
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-md">
-                      ⚠ {tf('pendingDeduction', 'Pending Stitching')}
-                    </span>
-                  )
-                ) : (
-                  <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-bg-hover text-text-muted border border-border-subtle rounded-md">
-                    {tf('noVal', 'None')}
-                  </span>
-                )}
-              </div>
+
+              {order.needsAster && (
+                <div className="mt-2 pt-3 border-t border-border-subtle/50 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('liningMaterial', 'Material')}</span>
+                    <span className="text-xs font-semibold text-text-main mt-0.5 truncate">{order.asterInventoryItem?.itemName || tf('unknown', 'Unknown')}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('liningCostPrice', 'Cost/Unit')}</span>
+                    <span className="text-xs font-semibold text-text-main mt-0.5">₹{(order.asterCostPrice || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('liningSellingPrice', 'Selling/Unit')}</span>
+                    <span className="text-xs font-semibold text-text-main mt-0.5">₹{(order.asterSellingPrice || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-color-accent-emerald uppercase tracking-wider">{tf('liningProfit', 'Total Profit')}</span>
+                    <span className="text-xs font-bold text-color-accent-emerald mt-0.5">₹{(order.asterProfit || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Assigned Karigar */}

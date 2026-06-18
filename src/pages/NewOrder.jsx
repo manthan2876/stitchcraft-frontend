@@ -32,6 +32,7 @@ export const NewOrder = () => {
   const [needsAster, setNeedsAster] = useState(false);
   const [asterQuantity, setAsterQuantity] = useState('');
   const [asterInventoryItem, setAsterInventoryItem] = useState('');
+  const [asterSellingPrice, setAsterSellingPrice] = useState('');
 
   // Karigar & Machine
   const [assignedKarigar, setAssignedKarigar] = useState('');
@@ -172,6 +173,7 @@ export const NewOrder = () => {
         needsAster,
         asterQuantity: needsAster ? (parseFloat(asterQuantity) || 0) : 0,
         asterInventoryItem: needsAster ? (asterInventoryItem || undefined) : undefined,
+        asterSellingPrice: needsAster ? (parseFloat(asterSellingPrice) || 0) : 0,
         assignedKarigar: assignedKarigar || undefined,
         assignedMachine: assignedMachine || undefined,
       };
@@ -265,13 +267,13 @@ export const NewOrder = () => {
               {/* Aster details — shown when needsAster is ON */}
               {needsAster && (
                 <div className="flex flex-col gap-3 bg-color-accent-purple/5 border border-color-accent-purple/20 rounded-xl p-4">
-                  <p className="text-[10px] font-extrabold text-color-accent-purple uppercase tracking-wider">Astar / Lining Details</p>
+                  <p className="text-[10px] font-extrabold text-color-accent-purple uppercase tracking-wider">{tf('astarLiningDetails', 'Astar / Lining Details')}</p>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-text-muted">Inventory Item (Lining)</label>
+                    <label className="text-xs font-bold text-text-muted">{tf('inventoryItemLining', 'Inventory Item (Lining)')}</label>
                     <select value={asterInventoryItem} onChange={(e) => setAsterInventoryItem(e.target.value)}
                       className="w-full px-3 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple transition-all text-sm font-semibold">
-                      <option value="">-- Select Inventory Item --</option>
+                      <option value="">{tf('selectInventoryItem', '-- Select Inventory Item --')}</option>
                       {inventoryItems.map(item => (
                         <option key={item._id} value={item._id}>
                           {item.itemName} ({item.quantity} {item.unit} available)
@@ -281,17 +283,31 @@ export const NewOrder = () => {
                   </div>
 
                   <InputField
-                    label="Astar Quantity Needed"
+                    label={tf('astarQuantityNeeded', 'Astar Quantity Needed')}
                     type="number"
                     value={asterQuantity}
                     onChange={(e) => setAsterQuantity(e.target.value)}
                     placeholder={`e.g. 2 ${inventoryItems.find(i => i._id === asterInventoryItem)?.unit || 'meters'}`}
                   />
 
+                  <InputField
+                    label={tf('liningSellingPriceLabel', `Lining Selling Price (per ${inventoryItems.find(i => i._id === asterInventoryItem)?.unit || 'unit'})`)}
+                    type="number"
+                    value={asterSellingPrice}
+                    onChange={(e) => setAsterSellingPrice(e.target.value)}
+                    placeholder={tf('liningSellingPricePlaceholder', 'e.g. 35')}
+                  />
+
+                  {asterInventoryItem && asterSellingPrice && (
+                    <p className="text-[10px] font-bold text-color-accent-emerald">
+                      {tf('marginPerUnit', 'Margin per unit')}: ₹{((parseFloat(asterSellingPrice) || 0) - (inventoryItems.find(i => i._id === asterInventoryItem)?.costPerUnit || 0)).toFixed(2)}
+                    </p>
+                  )}
+
                   {asterInventoryItem && asterQuantity && (
                     <div className="flex items-center gap-2 text-xs text-text-muted font-semibold bg-bg-secondary border border-border-subtle rounded-lg px-3 py-2">
                       <MdContentCut className="w-3.5 h-3.5 text-color-accent-purple" />
-                      <span>Stock will reduce by <strong className="text-text-main">{asterQuantity} {inventoryItems.find(i => i._id === asterInventoryItem)?.unit || 'units'}</strong> when order reaches Stitching stage</span>
+                      <span>{tf('stockReduceNoticePrefix', 'Stock will reduce by')} <strong className="text-text-main">{asterQuantity} {inventoryItems.find(i => i._id === asterInventoryItem)?.unit || 'units'}</strong> {tf('stockReduceNoticeSuffix', 'when order reaches Stitching stage')}</span>
                     </div>
                   )}
                 </div>

@@ -6,7 +6,7 @@ import { api } from '../services/api';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import InputField from '../components/common/InputField';
-import { MdArrowBack, MdSave, MdDelete, MdClose } from 'react-icons/md';
+import { MdArrowBack, MdSave, MdDelete, MdClose, MdContentCut } from 'react-icons/md';
 
 export const EditOrder = () => {
     const { id } = useParams();
@@ -22,12 +22,14 @@ export const EditOrder = () => {
 
     const [formData, setFormData] = useState({
         orderId: '', customerName: '', apparelType: '', status: 'Incoming',
-        deliveryDate: '', price: '', fabric: '', needsAster: false, assignedKarigar: '',
-        assignedMachine: ''
+        deliveryDate: '', price: '', fabric: '', needsAster: false,
+        asterQuantity: '', asterInventoryItem: '', asterSellingPrice: '',
+        assignedKarigar: '', assignedMachine: ''
     });
 
     const [karigars, setKarigars] = useState([]);
     const [machines, setMachines] = useState([]);
+    const [inventoryItems, setInventoryItems] = useState([]);
 
     // Helper with fallbacks for translations
     const tf = (key, fallback) => {
@@ -43,6 +45,10 @@ export const EditOrder = () => {
         api.get('/machines').then(setMachines).catch(err => {
             console.warn('Machines not available yet:', err.message);
             setMachines([]);
+        });
+        api.get('/inventory').then(setInventoryItems).catch(err => {
+            console.warn('Inventory not available yet:', err.message);
+            setInventoryItems([]);
         });
     }, []);
 
@@ -61,6 +67,9 @@ export const EditOrder = () => {
                     price: data.price,
                     fabric: data.fabric || '',
                     needsAster: data.needsAster || false,
+                    asterQuantity: data.asterQuantity || '',
+                    asterInventoryItem: data.asterInventoryItem ? (data.asterInventoryItem._id || data.asterInventoryItem) : '',
+                    asterSellingPrice: data.asterSellingPrice || '',
                     assignedKarigar: data.assignedKarigar ? (data.assignedKarigar._id || data.assignedKarigar) : '',
                     assignedMachine: data.assignedMachine ? (data.assignedMachine._id || data.assignedMachine) : ''
                 });
@@ -84,6 +93,9 @@ export const EditOrder = () => {
                  price: Number(formData.price),
                  fabric: formData.fabric,
                  needsAster: formData.needsAster,
+                 asterQuantity: formData.needsAster ? (parseFloat(formData.asterQuantity) || 0) : 0,
+                 asterInventoryItem: formData.needsAster ? (formData.asterInventoryItem || null) : null,
+                 asterSellingPrice: formData.needsAster ? (parseFloat(formData.asterSellingPrice) || 0) : 0,
                  assignedKarigar: formData.assignedKarigar || null,
                  assignedMachine: formData.assignedMachine || null
              });
@@ -161,7 +173,13 @@ export const EditOrder = () => {
                           </div>
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, needsAster: !formData.needsAster })}
+                            onClick={() => setFormData(prev => ({
+                                ...prev,
+                                needsAster: !prev.needsAster,
+                                asterQuantity: prev.needsAster ? '' : prev.asterQuantity,
+                                asterInventoryItem: prev.needsAster ? '' : prev.asterInventoryItem,
+                                asterSellingPrice: prev.needsAster ? '' : prev.asterSellingPrice
+                            }))}
                             className={`w-11 h-6 rounded-full border-2 transition-all cursor-pointer relative ${
                               formData.needsAster
                                 ? 'bg-color-accent-purple border-color-accent-purple'
@@ -173,6 +191,55 @@ export const EditOrder = () => {
                               }`} />
                           </button>
                         </div>
+
+                        {/* Aster details — shown when needsAster is ON */}
+                        {formData.needsAster && (
+                          <div className="flex flex-col gap-3 bg-color-accent-purple/5 border border-color-accent-purple/20 rounded-xl p-4 md:col-span-2">
+                            <p className="text-[10px] font-extrabold text-color-accent-purple uppercase tracking-wider">{tf('astarLiningDetails', 'Astar / Lining Details')}</p>
+
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold text-text-muted">{tf('inventoryItemLining', 'Inventory Item (Lining)')}</label>
+                              <select value={formData.asterInventoryItem} onChange={(e) => setFormData({ ...formData, asterInventoryItem: e.target.value })}
+                                className="w-full px-3 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple transition-all text-sm font-semibold">
+                                <option value="">{tf('selectInventoryItem', '-- Select Inventory Item --')}</option>
+                                {inventoryItems.map(item => (
+                                  <option key={item._id} value={item._id}>
+                                    {item.itemName} ({item.quantity} {item.unit} available)
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <InputField
+                              label={tf('astarQuantityNeeded', 'Astar Quantity Needed')}
+                              type="number"
+                              value={formData.asterQuantity}
+                              onChange={(e) => setFormData({ ...formData, asterQuantity: e.target.value })}
+                              placeholder={`e.g. 2 ${inventoryItems.find(i => i._id === formData.asterInventoryItem)?.unit || 'meters'}`}
+                            />
+
+                            <InputField
+                              label={tf('liningSellingPriceLabel', `Lining Selling Price (per ${inventoryItems.find(i => i._id === formData.asterInventoryItem)?.unit || 'unit'})`)}
+                              type="number"
+                              value={formData.asterSellingPrice}
+                              onChange={(e) => setFormData({ ...formData, asterSellingPrice: e.target.value })}
+                              placeholder={tf('liningSellingPricePlaceholder', 'e.g. 35')}
+                            />
+
+                            {formData.asterInventoryItem && formData.asterSellingPrice && (
+                              <p className="text-[10px] font-bold text-color-accent-emerald">
+                                {tf('marginPerUnit', 'Margin per unit')}: ₹{((parseFloat(formData.asterSellingPrice) || 0) - (inventoryItems.find(i => i._id === formData.asterInventoryItem)?.costPerUnit || 0)).toFixed(2)}
+                              </p>
+                            )}
+
+                            {formData.asterInventoryItem && formData.asterQuantity && (
+                              <div className="flex items-center gap-2 text-xs text-text-muted font-semibold bg-bg-secondary border border-border-subtle rounded-lg px-3 py-2">
+                                <MdContentCut className="w-3.5 h-3.5 text-color-accent-purple" />
+                                <span>{tf('stockReduceNoticePrefix', 'Stock will reduce by')} <strong className="text-text-main">{formData.asterQuantity} {inventoryItems.find(i => i._id === formData.asterInventoryItem)?.unit || 'units'}</strong> {tf('stockReduceNoticeSuffix', 'when order reaches Stitching stage')}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Assign Karigar select */}
                         <div className="flex flex-col gap-1.5">
