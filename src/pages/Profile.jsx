@@ -1,25 +1,61 @@
+/* src/pages/Profile.jsx */
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/common/Card';
 import { api } from '../services/api';
 import {
   MdPerson, MdEmail, MdBusiness, MdEdit, MdSave,
-  MdLogout, MdSecurity, MdStorefront, MdClose, MdCheck, MdAdd, MdDelete
+  MdLogout, MdPalette, MdNotifications, MdSecurity, MdStorefront,
+  MdClose, MdCheck, MdAdd, MdDelete
 } from 'react-icons/md';
 import ProfileImage from '../assets/profile.png';
 
 export const Profile = () => {
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, changeLanguage, t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState('Profile');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [name, setName] = useState(user?.name || '');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  // Password update states
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 4) {
+      setPasswordError('New password must be at least 4 characters long.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await api.put('/auth/update-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordSuccess('Password updated successfully!');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to update password.');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   // Shop states
   const [shops, setShops] = useState([]);
@@ -35,6 +71,27 @@ export const Profile = () => {
   const [deleteShopLoading, setDeleteShopLoading] = useState(false);
   const [deleteShopError, setDeleteShopError] = useState('');
 
+  // Load Settings from LocalStorage
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('stitchcraft_settings');
+    return saved ? JSON.parse(saved) : {
+      emailNotifications: true,
+      smsNotifications: false,
+      darkMode: true,
+      language: 'English',
+      currency: 'INR (₹)',
+      dateFormat: 'DD/MM/YYYY',
+    };
+  });
+
+  const { theme, toggleTheme } = useTheme();
+
+  // Save settings automatically when they change
+  useEffect(() => {
+    localStorage.setItem('stitchcraft_settings', JSON.stringify(settings));
+  }, [settings]);
+
+  // Fetch shops when Shop Info is loaded
   const fetchShops = async () => {
     setShopsLoading(true);
     try {
@@ -48,8 +105,19 @@ export const Profile = () => {
   };
 
   useEffect(() => {
-    fetchShops();
-  }, []);
+    if (activeTab === 'Shop Info') {
+      fetchShops();
+    }
+  }, [activeTab]);
+
+  const tabKeys = ['Profile', 'Shop Info', 'Settings', 'Change Password'];
+  const getTabLabel = (key) => {
+    if (key === 'Profile') return t('profile');
+    if (key === 'Shop Info') return t('shopsManager');
+    if (key === 'Settings') return t('settings');
+    if (key === 'Change Password') return t('changePassword');
+    return key;
+  };
 
   const handleLogout = () => {
     logout();
@@ -77,26 +145,6 @@ export const Profile = () => {
         alert(err.message || 'Failed to upload profile photo');
       }
     };
-  };
-
-  const handleSaveProfile = async () => {
-    if (!name.trim()) {
-      setError('Name cannot be empty');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    try {
-      const data = await api.put('/auth/profile', { name });
-      updateUser(data);
-      setIsEditingProfile(false);
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-      setError(err.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleSwitchShop = async (shopId) => {
@@ -189,15 +237,9 @@ export const Profile = () => {
     .substring(0, 2)
     .toUpperCase();
 
-  const tabKeys = ['Profile', 'Shop Info'];
-  const getTabLabel = (key) => {
-    if (key === 'Profile') return t('profile');
-    if (key === 'Shop Info') return t('shopsManager');
-    return key;
-  };
-
   return (
     <div className="flex flex-col gap-6 select-none max-w-3xl mx-auto">
+
       {/* Profile Hero Card */}
       <Card className="relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-color-accent-purple/40 via-color-accent-blue/30 to-color-accent-pink/30 blur-sm" />
@@ -263,7 +305,7 @@ export const Profile = () => {
         ))}
       </div>
 
-      {/* Profile Tab */}
+      {/* ── PROFILE TAB ── */}
       {activeTab === 'Profile' && (
         <Card className="flex flex-col gap-5">
           <div className="flex items-center justify-between border-b border-border-subtle pb-4">
@@ -280,90 +322,56 @@ export const Profile = () => {
               </button>
             ) : (
               <button
-                onClick={handleSaveProfile}
-                disabled={loading}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-color-accent-purple rounded-xl text-xs font-bold text-white-forced cursor-pointer disabled:opacity-50"
+                onClick={() => setIsEditingProfile(false)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-color-accent-purple rounded-xl text-xs font-bold text-white-forced cursor-pointer"
               >
-                <MdSave className="w-4 h-4 text-white-forced" />{loading ? 'Saving...' : t('save')}
+                <MdSave className="w-4 h-4 text-white-forced" />{t('save')}
               </button>
             )}
           </div>
 
-          {error && (
-            <p className="text-xs text-color-accent-pink font-semibold">{error}</p>
-          )}
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
-                <MdPerson className="w-3.5 h-3.5 text-color-accent-purple" />
-                {t('fullName')}
-              </label>
-              {isEditingProfile ? (
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  className="px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-sm text-text-main outline-none focus:border-color-accent-purple transition-all"
-                />
-              ) : (
-                <p className="px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-xl text-sm text-text-main font-semibold">
-                  {user?.name || 'Masterji Ramesh'}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
-                <MdEmail className="w-3.5 h-3.5 text-color-accent-purple" />
-                {t('emailAddress')}
-              </label>
-              <p className="px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-xl text-sm text-text-main font-semibold">
-                {user?.email}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
-                <MdSecurity className="w-3.5 h-3.5 text-color-accent-purple" />
-                {t('role')}
-              </label>
-              <p className="px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-xl text-sm text-text-main font-semibold">
-                {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
-                <MdBusiness className="w-3.5 h-3.5 text-color-accent-purple" />
-                {t('shopName')}
-              </label>
-              <p className="px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-xl text-sm text-text-main font-semibold">
-                {user?.shopName || 'Ramesh Tailors'}
-              </p>
-            </div>
+            {[
+              { label: t('fullName'), value: user?.name || 'Masterji Ramesh', icon: <MdPerson />, key: 'fullName' },
+              { label: t('emailAddress'), value: user?.email || 'ramesh@stitchcraft.com', icon: <MdEmail />, key: 'email' },
+              { label: t('role'), value: user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner')), icon: <MdSecurity />, key: 'role' },
+              { label: t('shopName'), value: user?.shopName || 'Ramesh Tailors', icon: <MdBusiness />, key: 'shopName' },
+            ].map(field => (
+              <div key={field.key} className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+                  {React.cloneElement(field.icon, { className: 'w-3.5 h-3.5 text-color-accent-purple' })}
+                  {field.label}
+                </label>
+                {isEditingProfile ? (
+                  <input
+                    defaultValue={field.value}
+                    className="px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-sm text-text-main outline-none focus:border-color-accent-purple transition-all"
+                  />
+                ) : (
+                  <p className="px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-xl text-sm text-text-main font-semibold">
+                    {field.value}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-cols-3 gap-4 mt-2 border-t border-border-subtle pt-5">
-            <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle text-center">
-              <p className="text-xl font-black text-text-main">
-                {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
-              </p>
-              <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider mt-1">{t('accountType')}</p>
-            </div>
-            <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle text-center">
-              <p className="text-xl font-black text-text-main">{shops.length || 1}</p>
-              <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider mt-1">{t('shopsManaged')}</p>
-            </div>
-            <div className="bg-bg-secondary p-4 rounded-xl border border-border-subtle text-center">
-              <p className="text-xl font-black text-text-main">2026</p>
-              <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider mt-1">{t('memberSince')}</p>
-            </div>
+            {[
+              { label: t('accountType'), value: user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner')) },
+              { label: t('shopsManaged'), value: String(shops.length || 1) },
+              { label: t('memberSince'), value: '2026' },
+            ].map(s => (
+              <div key={s.label} className="bg-bg-secondary p-4 rounded-xl border border-border-subtle text-center">
+                <p className="text-xl font-black text-text-main">{s.value}</p>
+                <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider mt-1">{s.label}</p>
+              </div>
+            ))}
           </div>
         </Card>
       )}
 
-      {/* Shop Info Tab */}
+      {/* ── SHOP INFO TAB ── */}
       {activeTab === 'Shop Info' && (
         <div className="flex flex-col gap-6">
           <Card className="flex flex-col gap-5">
@@ -412,7 +420,7 @@ export const Profile = () => {
                         <div className="min-w-0 pr-12">
                           <h4 className="text-sm font-bold text-text-main truncate">{shop.shopName}</h4>
                           <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#007aff]">
-                            {t((shop.plan || 'Free').toLowerCase() + 'plan')}
+                            {t((shop.plan || 'Free').toLowerCase() + 'Plan')}
                           </span>
                         </div>
                       </div>
@@ -441,7 +449,7 @@ export const Profile = () => {
                           className="px-2.5 py-1.5 bg-bg-hover hover:bg-border-medium text-text-main rounded-xl text-[10px] font-bold transition-all cursor-pointer border border-border-subtle"
                           title={t('editDetails')}
                         >
-                          <MdEdit className="w-3.5 h-3.5 text-color-accent-purple" />
+                          <MdEdit className="w-3.5 h-3.5 text-color-accent-purple animate-pulse" />
                         </button>
                         <button
                           onClick={() => setDeleteTargetShop(shop)}
@@ -458,6 +466,163 @@ export const Profile = () => {
             )}
           </Card>
         </div>
+      )}
+
+      {/* ── SETTINGS TAB ── */}
+      {activeTab === 'Settings' && (
+        <Card className="flex flex-col gap-5">
+          <div className="border-b border-border-subtle pb-4">
+            <h3 className="text-base font-bold text-text-main">{t('preferences')}</h3>
+            <p className="text-xs text-text-muted mt-0.5">{t('preferencesSub')}</p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <MdNotifications className="w-3.5 h-3.5" /> {t('appPreferences')}
+            </p>
+            {[
+              { key: 'emailNotifications', label: t('emailNotifications'), desc: t('emailNotificationsDesc') },
+              { key: 'smsNotifications', label: t('smsNotifications'), desc: t('smsNotificationsDesc') },
+              { key: 'darkMode', label: t('darkModeTheme'), desc: t('darkModeThemeDesc') },
+            ].map(s => (
+              <div key={s.key} className="flex items-center justify-between bg-bg-secondary border border-border-subtle rounded-xl px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-text-main">{s.label}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{s.desc}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (s.key === 'darkMode') {
+                      toggleTheme();
+                    } else {
+                      setSettings(prev => ({ ...prev, [s.key]: !prev[s.key] }));
+                    }
+                  }}
+                  className={`w-11 h-6 rounded-full border-2 transition-all cursor-pointer relative ${
+                    (s.key === 'darkMode' ? theme === 'dark' : settings[s.key])
+                      ? 'bg-color-accent-purple border-color-accent-purple'
+                      : 'bg-bg-hover border-border-medium'
+                    }`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${
+                    (s.key === 'darkMode' ? theme === 'dark' : settings[s.key]) ? 'left-[calc(100%-18px)]' : 'left-0.5'
+                    }`} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <MdPalette className="w-3.5 h-3.5" /> {t('display')}
+            </p>
+            {[
+              { key: 'currency', label: t('currency'), options: ['INR (₹)', 'USD ($)', 'EUR (€)'] },
+              { key: 'dateFormat', label: t('dateFormat'), options: ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] },
+              { key: 'language', label: t('languageLabel'), options: [] },
+            ].map(s => (
+              <div key={s.key} className="flex items-center justify-between bg-bg-input border border-border-subtle rounded-xl px-4 py-3">
+                <p className="text-sm font-bold text-text-main">{s.label}</p>
+                <select
+                  value={s.key === 'language' ? language : settings[s.key]}
+                  onChange={e => {
+                    if (s.key === 'language') {
+                      changeLanguage(e.target.value);
+                    } else {
+                      setSettings(prev => ({ ...prev, [s.key]: e.target.value }));
+                    }
+                  }}
+                  className="bg-bg-primary border border-border-medium rounded-lg px-3 py-1.5 text-xs text-text-main outline-none focus:border-color-accent-purple cursor-pointer"
+                >
+                  {s.key === 'language' ? (
+                    <>
+                      <option value="en" className="bg-bg-card">English</option>
+                      <option value="gu" className="bg-bg-card">Gujarati (ગુજરાતી)</option>
+                      <option value="hi" className="bg-bg-card">Hindi (हिन्दी)</option>
+                    </>
+                  ) : (
+                    s.options.map(o => <option key={o} value={o} className="bg-bg-card">{o}</option>)
+                  )}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div className="border border-rose-500/20 bg-rose-500/5 rounded-2xl p-4 flex flex-col gap-3">
+            <p className="text-xs font-bold text-rose-500 uppercase tracking-wider">⚠ {t('accountActions')}</p>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-sm font-bold hover:bg-rose-500/20 transition-all cursor-pointer w-full justify-center"
+            >
+              <MdLogout className="w-4 h-4" />
+              {t('signOut')}
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {/* ── CHANGE PASSWORD TAB ── */}
+      {activeTab === 'Change Password' && (
+        <Card className="flex flex-col gap-5">
+          <div className="border-b border-border-subtle pb-4">
+            <h3 className="text-base font-bold text-text-main">{t('changePassword')}</h3>
+            <p className="text-xs text-text-muted mt-0.5">{t('changePasswordSub')}</p>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{t('currentPassword')}</label>
+              <input
+                type="password"
+                required
+                value={passwordForm.currentPassword}
+                onChange={e => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                placeholder={t('currentPassword')}
+                className="px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-sm text-text-main outline-none focus:border-color-accent-purple transition-all placeholder:text-text-muted/50"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{t('newPassword')}</label>
+              <input
+                type="password"
+                required
+                value={passwordForm.newPassword}
+                onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                placeholder={t('newPassword')}
+                className="px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-sm text-text-main outline-none focus:border-color-accent-purple transition-all placeholder:text-text-muted/50"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{t('confirmNewPassword')}</label>
+              <input
+                type="password"
+                required
+                value={passwordForm.confirmNewPassword}
+                onChange={e => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
+                placeholder={t('confirmNewPassword')}
+                className="px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-sm text-text-main outline-none focus:border-color-accent-purple transition-all placeholder:text-text-muted/50"
+              />
+            </div>
+
+            {passwordError && (
+              <p className="text-xs text-color-accent-pink font-bold text-center animate-pulse">{passwordError}</p>
+            )}
+
+            {passwordSuccess && (
+              <p className="text-xs text-color-accent-emerald font-bold text-center animate-pulse">{passwordSuccess}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={passwordLoading}
+              className="py-2.5 bg-color-accent-purple text-white-forced rounded-xl font-bold text-sm shadow-lg shadow-color-accent-purple/20 hover:bg-color-accent-purple/90 transition-all cursor-pointer disabled:opacity-50"
+            >
+              {passwordLoading ? t('updatingLock') : t('changePasswordBtn')}
+            </button>
+          </form>
+        </Card>
       )}
 
       {/* Create/Edit Shop Modal */}
