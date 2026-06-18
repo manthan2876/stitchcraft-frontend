@@ -13,6 +13,8 @@ import CustomerDetails from './pages/CustomerDetails';
 import Orders from './pages/Orders';
 import NewOrder from './pages/NewOrder';
 import EditOrder from './pages/EditOrder';
+import Payments from './pages/Payments';
+import Ledger from './pages/Ledger';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -35,6 +37,8 @@ export const App = () => {
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/new-order" element={<NewOrder />} />
                 <Route path="/orders/:id/edit" element={<EditOrder />} />
+                <Route path="/payments" element={<Payments />} />
+                <Route path="/ledger" element={<Ledger />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 

@@ -9,6 +9,7 @@ import {
   MdPerson,
   MdPeople,
   MdAddCircle,
+  MdReceipt,
 } from 'react-icons/md';
 import { GiScissors, GiSewingNeedle } from 'react-icons/gi';
 
@@ -19,6 +20,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { name: t('dashboard'), path: '/dashboard', icon: <MdDashboard className="w-5 h-5" /> },
     { name: t('orders') !== 'orders' ? t('orders') : 'Orders', path: '/orders', icon: <MdAddCircle className="w-5 h-5" /> },
+    { name: t('payments') !== 'payments' ? t('payments') : 'Payments', path: '/payments', icon: <MdReceipt className="w-5 h-5" /> },
     { name: t('profile'), path: '/profile', icon: <MdPerson className="w-5 h-5" /> },
     { name: t('customerRegistry') !== 'customerRegistry' ? t('customerRegistry') : 'Customers', path: '/customers', icon: <MdPeople className="w-5 h-5" /> },
   ];
