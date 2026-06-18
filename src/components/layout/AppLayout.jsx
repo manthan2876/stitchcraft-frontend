@@ -36,6 +36,7 @@ export const AppLayout = () => {
     if (location.pathname === '/ledger') return t('paymentsLedger') !== 'paymentsLedger' ? t('paymentsLedger') : 'Payments Ledger';
     if (location.pathname === '/deliveries') return t('deliveriesDispatch') !== 'deliveriesDispatch' ? t('deliveriesDispatch') : 'Deliveries Dispatch';
     if (location.pathname === '/notifications') return t('notificationsFeed') !== 'notificationsFeed' ? t('notificationsFeed') : 'Notifications Feed';
+    if (location.pathname === '/karigars') return t('karigarRegistry') !== 'karigarRegistry' ? t('karigarRegistry') : 'Karigar Registry';
     return "Tailor's App ERP";
   };
 

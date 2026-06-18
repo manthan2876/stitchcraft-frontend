@@ -12,6 +12,7 @@ import {
   MdReceipt,
   MdLocalShipping,
   MdNotifications,
+  MdAssignmentInd,
 } from 'react-icons/md';
 import { GiScissors, GiSewingNeedle } from 'react-icons/gi';
 
@@ -25,6 +26,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { name: t('payments') !== 'payments' ? t('payments') : 'Payments', path: '/payments', icon: <MdReceipt className="w-5 h-5" /> },
     { name: t('deliveries') !== 'deliveries' ? t('deliveries') : 'Deliveries', path: '/deliveries', icon: <MdLocalShipping className="w-5 h-5" /> },
     { name: t('notifications') !== 'notifications' ? t('notifications') : 'Notifications', path: '/notifications', icon: <MdNotifications className="w-5 h-5" /> },
+    { name: t('karigars') !== 'karigars' ? t('karigars') : 'Karigars', path: '/karigars', icon: <MdAssignmentInd className="w-5 h-5" /> },
     { name: t('profile'), path: '/profile', icon: <MdPerson className="w-5 h-5" /> },
     { name: t('customerRegistry') !== 'customerRegistry' ? t('customerRegistry') : 'Customers', path: '/customers', icon: <MdPeople className="w-5 h-5" /> },
   ];
