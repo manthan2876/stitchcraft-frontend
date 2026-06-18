@@ -15,6 +15,7 @@ import NewOrder from './pages/NewOrder';
 import EditOrder from './pages/EditOrder';
 import Payments from './pages/Payments';
 import Ledger from './pages/Ledger';
+import Delivery from './pages/Delivery';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -39,6 +40,7 @@ export const App = () => {
                 <Route path="/orders/:id/edit" element={<EditOrder />} />
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/ledger" element={<Ledger />} />
+                <Route path="/deliveries" element={<Delivery />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 
