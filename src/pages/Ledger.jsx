@@ -5,30 +5,16 @@ import Card from '../components/common/Card';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import { useLanguage } from '../context/LanguageContext';
 import {
-  MdSearch,
-  MdFilterList,
-  MdFileDownload,
-  MdPrint,
-  MdTrendingUp,
-  MdTrendingDown,
-  MdInventory,
-  MdAccountBalanceWallet,
-  MdMoneyOff,
-  MdCheckCircle,
-} from 'react-icons/icons'; // Note: we can import from react-icons/md or similar
-import * as Icons from 'react-icons/md';
-
-const {
-  MdSearch: SearchIcon,
-  MdFilterList: FilterIcon,
-  MdFileDownload: DownloadIcon,
-  MdPrint: PrintIcon,
-  MdTrendingUp: UpIcon,
-  MdTrendingDown: DownIcon,
-  MdInventory: InventoryIcon,
-  MdAccountBalanceWallet: WalletIcon,
-  MdMoneyOff: ExpenseIcon,
-} = Icons;
+  MdSearch as SearchIcon,
+  MdFilterList as FilterIcon,
+  MdFileDownload as DownloadIcon,
+  MdPrint as PrintIcon,
+  MdTrendingUp as UpIcon,
+  MdTrendingDown as DownIcon,
+  MdInventory as InventoryIcon,
+  MdAccountBalanceWallet as WalletIcon,
+  MdMoneyOff as ExpenseIcon,
+} from 'react-icons/md';
 
 export const Ledger = () => {
   const { t } = useLanguage();

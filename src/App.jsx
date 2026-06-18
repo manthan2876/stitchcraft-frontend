@@ -22,6 +22,9 @@ import Karigars from './pages/Karigars';
 import KarigarDetails from './pages/KarigarDetails';
 import Machines from './pages/Machines';
 import Inventory from './pages/Inventory';
+import Invoices from './pages/Invoices';
+import InvoiceDetails from './pages/InvoiceDetails';
+import PublicInvoice from './pages/PublicInvoice';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -34,6 +37,9 @@ export const App = () => {
               {/* Public Authentication Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              
+              {/* Customer Guest Invoice Route */}
+              <Route path="/invoice/share/:id" element={<PublicInvoice />} />
 
               {/* Authenticated Application Shell */}
               <Route element={<AppLayout />}>
@@ -45,6 +51,8 @@ export const App = () => {
                 <Route path="/orders/:id" element={<OrderDetails />} />
                 <Route path="/new-order" element={<NewOrder />} />
                 <Route path="/orders/:id/edit" element={<EditOrder />} />
+                <Route path="/invoices" element={<Invoices />} />
+                <Route path="/invoices/:id" element={<InvoiceDetails />} />
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/ledger" element={<Ledger />} />
                 <Route path="/deliveries" element={<Delivery />} />
