@@ -18,6 +18,7 @@ import Ledger from './pages/Ledger';
 import Delivery from './pages/Delivery';
 import Notifications from './pages/Notifications';
 import Karigars from './pages/Karigars';
+import Machines from './pages/Machines';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -45,6 +46,7 @@ export const App = () => {
                 <Route path="/deliveries" element={<Delivery />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/karigars" element={<Karigars />} />
+                <Route path="/machines" element={<Machines />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 
