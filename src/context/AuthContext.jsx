@@ -76,8 +76,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('stitchcraft_token');
   };
 
+  const updateUser = (updatedData) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const newUser = { ...prev, ...updatedData };
+      localStorage.setItem('stitchcraft_user', JSON.stringify(newUser));
+      return newUser;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, loading, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

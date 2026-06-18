@@ -6,6 +6,7 @@ import {
   MdDashboard,
   MdExitToApp,
   MdClose,
+  MdPerson,
 } from 'react-icons/md';
 import { GiScissors, GiSewingNeedle } from 'react-icons/gi';
 
@@ -15,6 +16,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { name: t('dashboard'), path: '/dashboard', icon: <MdDashboard className="w-5 h-5" /> },
+    { name: t('profile'), path: '/profile', icon: <MdPerson className="w-5 h-5" /> },
   ];
 
   return (

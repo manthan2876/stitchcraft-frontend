@@ -66,7 +66,22 @@ export const translations = {
     mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun',
     mon_short: 'M', tue_short: 'T', wed_short: 'W', thu_short: 'T', fri_short: 'F', sat_short: 'S', sun_short: 'S',
     january: 'January', february: 'February', march: 'March', april: 'April', may: 'May', june: 'June',
-    july: 'July', august: 'August', september: 'September', october: 'October', november: 'November', december: 'December'
+    july: 'July', august: 'August', september: 'September', october: 'October', november: 'November', december: 'December',
+
+    // Profile
+    profile: 'Profile',
+    roleOwner: 'Owner',
+    personalInfo: 'Personal Information',
+    personalInfoSub: 'Update your display details and contact credentials.',
+    edit: 'Edit',
+    save: 'Save',
+    fullName: 'Full Name',
+    emailAddress: 'Email Address',
+    role: 'Role',
+    shopName: 'Shop Name',
+    accountType: 'Account Type',
+    shopsManaged: 'Shops Managed',
+    memberSince: 'Member Since'
   },
   gu: {
     dashboard: 'ડેશબોર્ડ',
@@ -123,7 +138,22 @@ export const translations = {
     mon: 'સોમ', tue: 'મંગળ', wed: 'બુધ', thu: 'ગુરુ', fri: 'શુક્ર', sat: 'શનિ', sun: 'રવિ',
     mon_short: 'સો', tue_short: 'મં', wed_short: 'બુ', thu_short: 'ગુ', fri_short: 'શુ', sat_short: 'શ', sun_short: 'ર',
     january: 'જાન્યુઆરી', february: 'ફેબ્રુઆરી', march: 'માર્ચ', april: 'એપ્રિલ', may: 'મે', june: 'જૂન',
-    july: 'જુલાઈ', august: 'ઓગસ્ટ', september: 'સપ્ટેમ્બર', october: 'ઓક્ટોબર', november: 'નવેમ્બર', december: 'ડિસેમ્બર'
+    july: 'જુલાઈ', august: 'ઓગસ્ટ', september: 'સપ્ટેમ્બર', october: 'ઓક્ટોબર', november: 'નવેમ્બર', december: 'ડિસેમ્બર',
+
+    // Profile
+    profile: 'પ્રોફાઇલ',
+    roleOwner: 'માલિક',
+    personalInfo: 'વ્યક્તિગત માહિતી',
+    personalInfoSub: 'તમારી વિગતો અને સંપર્ક માહિતી અપડેટ કરો.',
+    edit: 'સુધારો',
+    save: 'સાચવો',
+    fullName: 'પૂરું નામ',
+    emailAddress: 'ઇમેઇલ સરનામું',
+    role: 'ભૂમિકા',
+    shopName: 'દુકાનનું નામ',
+    accountType: 'ખાતાનો પ્રકાર',
+    shopsManaged: 'સંચાલિત દુકાનો',
+    memberSince: 'સભ્યપદ વર્ષ'
   },
   hi: {
     dashboard: 'डैशबोर्ड',
@@ -180,6 +210,21 @@ export const translations = {
     mon: 'सोम', tue: 'मंगल', wed: 'बुध', thu: 'गुरु', fri: 'शुक्र', sat: 'शनि', sun: 'रवि',
     mon_short: 'सो', tue_short: 'मं', wed_short: 'बु', thu_short: 'गु', fri_short: 'शु', sat_short: 'श', sun_short: 'र',
     january: 'जनवरी', february: 'फ़रवरी', march: 'मार्च', april: 'अप्रैल', may: 'मई', june: 'जून',
-    july: 'जुलाई', august: 'अगस्त', september: 'सितंबर', october: 'अक्टूबर', november: 'नवंबर', december: 'दिसंबर'
+    july: 'जुलाई', august: 'अगस्त', september: 'सितंबर', october: 'अक्टूबर', november: 'नवंबर', december: 'दिसंबर',
+
+    // Profile
+    profile: 'प्रोफ़ाइल',
+    roleOwner: 'मालिक',
+    personalInfo: 'व्यक्तिगत जानकारी',
+    personalInfoSub: 'अपने प्रदर्शन विवरण और संपर्क क्रेडेंशियल अपडेट करें।',
+    edit: 'बदलें',
+    save: 'सहेजें',
+    fullName: 'पूरा नाम',
+    emailAddress: 'ईमेल पता',
+    role: 'भूमिका',
+    shopName: 'दुकान का नाम',
+    accountType: 'खाता प्रकार',
+    shopsManaged: 'प्रबंधित दुकानें',
+    memberSince: 'सदस्यता वर्ष'
   }
 };

@@ -7,6 +7,7 @@ import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -23,6 +24,7 @@ export const App = () => {
               {/* Authenticated Application Shell */}
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 

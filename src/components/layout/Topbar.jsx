@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { MdSearch, MdMenu } from 'react-icons/md';
 import { useLanguage } from '../../context/LanguageContext';
 import ProfileImage from '../../assets/profile.png';
@@ -7,6 +8,7 @@ import ProfileImage from '../../assets/profile.png';
 export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <div className="h-[80px] px-4 sm:px-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary select-none">
@@ -37,17 +39,21 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
         {/* Divider */}
         <div className="h-6 sm:h-8 w-[1px] bg-border-subtle" />
 
-        {/* Profile info (read-only in Step 1) */}
-        <div className="flex items-center gap-2 sm:gap-3 select-none">
+        {/* Profile info - clickable */}
+        <button
+          onClick={() => navigate('/profile')}
+          className="flex items-center gap-2 sm:gap-3 group cursor-pointer text-left"
+          title="View Profile"
+        >
           <div className="text-right hidden sm:block">
-            <h4 className="text-xs sm:text-sm font-bold text-text-main">
+            <h4 className="text-xs sm:text-sm font-bold text-text-main group-hover:text-color-accent-purple transition-colors">
               {user?.name || 'Masterji Ramesh'}
             </h4>
             <span className="text-[10px] sm:text-xs font-semibold text-text-muted capitalize">
               {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-border-medium bg-bg-card flex items-center justify-center shadow-md transition-all">
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-bg-card flex items-center justify-center shadow-md transition-all">
             <img
               src={user?.avatar && user.avatar !== 'profile.png' ? user.avatar : ProfileImage}
               alt="Profile"
@@ -58,7 +64,7 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
               }}
             />
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );
