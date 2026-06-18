@@ -155,7 +155,8 @@ export const Orders = () => {
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('orderId', 'Order ID')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('customer', 'Customer')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('apparel', 'Apparel')}</th>
-                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('lining', 'Lining')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Maap / Meas.</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('lining', 'Lining / Astar')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('karigar', 'Karigar')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('dateCreated', 'Date Created')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('deliveryDate', 'Delivery Date')}</th>
@@ -167,13 +168,13 @@ export const Orders = () => {
             <tbody className="divide-y divide-border-subtle">
               {loading ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="11" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('syncing', 'Syncing...')}
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="11" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('ordersEmpty', 'No orders recorded in this shop yet.')}
                   </td>
                 </tr>
@@ -183,9 +184,29 @@ export const Orders = () => {
                     <td className="px-6 py-4 text-sm font-black text-text-main">{order.orderId}</td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main/90">{order.customerName}</td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">{order.apparelType ? tf('apparel' + order.apparelType, order.apparelType) : '—'}</td>
+                    {/* Measurement type badge */}
+                    <td className="px-6 py-4 text-xs font-bold">
+                      {order.measurementType === 'Maap' ? (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20">
+                          🧵 Maap
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/20">
+                          📏 Meas.
+                        </span>
+                      )}
+                    </td>
+                    {/* Astar/Lining column */}
                     <td className="px-6 py-4 text-xs font-bold">
                       {order.needsAster ? (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 text-white-forced">{tf('yesVal', 'Yes')}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 inline-flex items-center gap-1">
+                            Yes{order.asterQuantity > 0 ? ` · ${order.asterQuantity}` : ''}
+                          </span>
+                          {order.asterDeducted && (
+                            <span className="text-[9px] text-color-accent-emerald font-extrabold flex items-center gap-0.5">✓ Stock deducted</span>
+                          )}
+                        </div>
                       ) : (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-bg-hover text-text-muted border border-border-subtle">{tf('noVal', 'No')}</span>
                       )}
