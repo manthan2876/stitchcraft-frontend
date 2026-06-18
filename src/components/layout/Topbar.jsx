@@ -7,7 +7,7 @@ import ProfileImage from '../../assets/profile.png';
 
 export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
   return (
@@ -36,6 +36,19 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
 
       {/* Right widgets */}
       <div className="flex items-center gap-3 sm:gap-6">
+        {/* Language Switcher */}
+        <div className="flex items-center gap-1 bg-bg-primary border border-border-subtle rounded-xl px-2.5 py-1.5 shadow-sm">
+          <select
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="bg-transparent text-xs font-bold text-text-main outline-none cursor-pointer"
+          >
+            <option value="en" className="bg-bg-card">English (EN)</option>
+            <option value="gu" className="bg-bg-card">ગુજરાતી (GU)</option>
+            <option value="hi" className="bg-bg-card">हिन्दी (HI)</option>
+          </select>
+        </div>
+
         {/* Divider */}
         <div className="h-6 sm:h-8 w-[1px] bg-border-subtle" />
 
