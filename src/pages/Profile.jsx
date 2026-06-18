@@ -12,6 +12,7 @@ import {
   MdClose, MdCheck, MdAdd, MdDelete
 } from 'react-icons/md';
 import ProfileImage from '../assets/profile.png';
+import { uploadToPrivateBucket, getSignedUrl } from '../services/supabase';
 
 export const Profile = () => {
   const { user, logout, updateUser } = useAuth();
@@ -20,6 +21,7 @@ export const Profile = () => {
 
   const [activeTab, setActiveTab] = useState('Profile');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(ProfileImage)
 
   // Password update states
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
@@ -124,6 +126,16 @@ export const Profile = () => {
     navigate('/login');
   };
 
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (user?.avatar && user.avatar !== 'profile.png') {
+        const url = await getSignedUrl('profile-images', user.avatar);
+        if (url) setAvatarUrl(url);
+      }
+    };
+    loadAvatar();
+  }, [user]);
+
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -133,18 +145,20 @@ export const Profile = () => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = async () => {
-      const base64Data = reader.result;
-      try {
-        const data = await api.put('/auth/profile', { avatar: base64Data });
-        updateUser(data);
-      } catch (err) {
-        console.error('Failed to upload photo:', err);
-        alert(err.message || 'Failed to upload profile photo');
-      }
-    };
+    setShopModalLoading(true); // Using a loading state to disable UI during upload
+    try {
+      // 1. Upload to Supabase and get back the storage path
+      const path = await uploadToPrivateBucket('profile-images', file);
+
+      // 2. Save the path string to your MongoDB User model
+      const data = await api.put('/auth/profile', { avatar: path });
+      updateUser(data);
+    } catch (err) {
+      console.error('Failed to upload photo:', err);
+      alert(err.message || 'Failed to upload profile photo');
+    } finally {
+      setShopModalLoading(false);
+    }
   };
 
   const handleSwitchShop = async (shopId) => {
@@ -256,7 +270,7 @@ export const Profile = () => {
               <span>Upload</span>
             </div>
             <img
-              src={user?.avatar && user.avatar !== 'profile.png' ? user.avatar : ProfileImage}
+              src={avatarUrl}
               alt="Profile"
               className="w-full h-full object-cover"
               onError={e => {
@@ -498,14 +512,12 @@ export const Profile = () => {
                       setSettings(prev => ({ ...prev, [s.key]: !prev[s.key] }));
                     }
                   }}
-                  className={`w-11 h-6 rounded-full border-2 transition-all cursor-pointer relative ${
-                    (s.key === 'darkMode' ? theme === 'dark' : settings[s.key])
-                      ? 'bg-color-accent-purple border-color-accent-purple'
-                      : 'bg-bg-hover border-border-medium'
+                  className={`w-11 h-6 rounded-full border-2 transition-all cursor-pointer relative ${(s.key === 'darkMode' ? theme === 'dark' : settings[s.key])
+                    ? 'bg-color-accent-purple border-color-accent-purple'
+                    : 'bg-bg-hover border-border-medium'
                     }`}
                 >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${
-                    (s.key === 'darkMode' ? theme === 'dark' : settings[s.key]) ? 'left-[calc(100%-18px)]' : 'left-0.5'
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${(s.key === 'darkMode' ? theme === 'dark' : settings[s.key]) ? 'left-[calc(100%-18px)]' : 'left-0.5'
                     }`} />
                 </button>
               </div>

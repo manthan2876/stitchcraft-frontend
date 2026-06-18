@@ -5,13 +5,27 @@ import { MdSearch, MdMenu, MdWbSunny, MdNightsStay } from 'react-icons/md';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import ProfileImage from '../../assets/profile.png';
+import { useState, useEffect } from 'react';
+import { getSignedUrl } from '../../services/supabase';
 
 export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const [avatarUrl, setAvatarUrl] = useState(ProfileImage);
 
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (user?.avatar && user.avatar !== 'profile.png') {
+        const url = await getSignedUrl('profile-images', user.avatar);
+        if (url) setAvatarUrl(url);
+      } else {
+        setAvatarUrl(ProfileImage); // Fallback to initials
+      }
+    };
+    loadAvatar();
+  }, [user]);
   return (
     <div className="h-[80px] px-4 sm:px-8 border-b border-border-subtle flex items-center justify-between bg-bg-secondary select-none">
       {/* Title & Mobile Toggle */}
@@ -81,16 +95,14 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
               {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-bg-card flex items-center justify-center shadow-md transition-all">
-            <img
-              src={user?.avatar && user.avatar !== 'profile.png' ? user.avatar : ProfileImage}
-              alt="Profile"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = `<span class="text-text-main font-black text-sm">${(user?.name || 'MR').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}</span>`;
-              }}
-            />
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-bg-card flex items-center justify-center shadow-lg transition-all">
+            {avatarUrl ? (
+              <img src={avatarUrl} className="w-full h-full object-cover" alt="Profile" />
+            ) : (
+              <span className="text-text-main font-black text-sm">
+                {(user?.name || 'MR').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+              </span>
+            )}
           </div>
         </button>
       </div>

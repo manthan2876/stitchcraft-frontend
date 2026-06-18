@@ -12,6 +12,8 @@ import {
   MdCamera, MdPhotoLibrary, MdClose, MdCheckCircle,
   MdStraighten, MdContentCut
 } from 'react-icons/md';
+// Add this line at the top of your imports
+import { uploadToPrivateBucket } from '../services/supabase';
 
 export const NewOrder = () => {
   const navigate = useNavigate();
@@ -133,31 +135,40 @@ export const NewOrder = () => {
       customerName = newCustName || 'New Client';
     }
 
-    const shirtFields = ['neck', 'chest', 'waist', 'hips', 'shoulder', 'sleeves', 'length', 'frontNeck', 'backNeck', 'notes'];
-    const pantFields = ['length', 'waist', 'hips', 'inseam', 'thigh', 'rise', 'bottom', 'notes'];
-    const shirt = {};
-    const pant = {};
-    shirtFields.forEach(f => { if (measurements[f] !== undefined && measurements[f] !== '') shirt[f] = measurements[f]; });
-    pantFields.forEach(f => { if (measurements[f] !== undefined && measurements[f] !== '') pant[f] = measurements[f]; });
-
-    const orderData = {
-      customerName,
-      customer: customerId,
-      customerPhone: custMode === 'new' ? newCustPhone : undefined,
-      apparelType,
-      deliveryDate: deliveryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      price: parseFloat(totalAmount) || 0,
-      advancePaid: parseFloat(advancePaid) || 0,
-      measurementType,
-      maapImageUrl: measurementType === 'Maap' ? (maapPhoto?.base64 || '') : '',
-      measurements: measurementType === 'Measurements' ? { shirt, pant, others: measurements.notes || '' } : undefined,
-      needsAster,
-      asterQuantity: needsAster ? (parseFloat(asterQuantity) || 0) : 0,
-      asterInventoryItem: needsAster ? (asterInventoryItem || undefined) : undefined,
-      assignedKarigar: assignedKarigar || undefined,
-    };
-
     try {
+      // Handle Supabase Upload for Maap
+      let storagePath = '';
+      if (measurementType === 'Maap' && maapPhoto) {
+        const response = await fetch(maapPhoto.base64);
+        const blob = await response.blob();
+        const file = new File([blob], 'maap-photo.jpg', { type: 'image/jpeg' });
+        storagePath = await uploadToPrivateBucket('maap-images', file);
+      }
+
+      const shirtFields = ['neck', 'chest', 'waist', 'hips', 'shoulder', 'sleeves', 'length', 'frontNeck', 'backNeck', 'notes'];
+      const pantFields = ['length', 'waist', 'hips', 'inseam', 'thigh', 'rise', 'bottom', 'notes'];
+      const shirt = {};
+      const pant = {};
+      shirtFields.forEach(f => { if (measurements[f] !== undefined && measurements[f] !== '') shirt[f] = measurements[f]; });
+      pantFields.forEach(f => { if (measurements[f] !== undefined && measurements[f] !== '') pant[f] = measurements[f]; });
+
+      const orderData = {
+        customerName,
+        customer: customerId,
+        customerPhone: custMode === 'new' ? newCustPhone : undefined,
+        apparelType,
+        deliveryDate: deliveryDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        price: parseFloat(totalAmount) || 0,
+        advancePaid: parseFloat(advancePaid) || 0,
+        measurementType,
+        maapImageUrl: storagePath, // Save the path string, not the base64
+        measurements: measurementType === 'Measurements' ? { shirt, pant, others: measurements.notes || '' } : undefined,
+        needsAster,
+        asterQuantity: needsAster ? (parseFloat(asterQuantity) || 0) : 0,
+        asterInventoryItem: needsAster ? (asterInventoryItem || undefined) : undefined,
+        assignedKarigar: assignedKarigar || undefined,
+      };
+
       await api.post('/orders', orderData);
       navigate('/orders');
     } catch (err) {
