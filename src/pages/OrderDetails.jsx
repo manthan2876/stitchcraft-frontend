@@ -467,6 +467,25 @@ export const OrderDetails = () => {
                 <span>{tf('recordPayment', 'Record Payment')}</span>
               </button>
             )}
+
+            {order.transactions && order.transactions.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border-subtle flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('paymentHistory', 'Payment History')}</span>
+                <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+                  {order.transactions.map((tx) => (
+                    <div key={tx._id} className="flex justify-between items-center bg-bg-secondary/60 border border-border-subtle/40 rounded-xl p-2.5 text-[11px] font-semibold text-text-main">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-bold">{tx.paymentType || 'Cash'}</span>
+                        <span className="text-[9px] text-text-muted">{new Date(tx.date).toLocaleDateString()}</span>
+                      </div>
+                      <span className={tx.type === 'Refund' ? 'text-rose-500 font-extrabold' : 'text-emerald-500 font-extrabold'}>
+                        {tx.type === 'Refund' ? '-' : '+'}{formatCurrency(tx.amount)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
 
           {/* Delivery Card */}

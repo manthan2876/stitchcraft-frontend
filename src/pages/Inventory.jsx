@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import Card from '../components/common/Card';
+import { formatCurrency } from '../utils/formatters';
 import { MdSearch, MdClose, MdAdd, MdEdit, MdDelete, MdInventory } from 'react-icons/md';
 
 export const Inventory = () => {
@@ -181,6 +182,7 @@ export const Inventory = () => {
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('stockLevel', 'Stock Level')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('unitType', 'Unit Type')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('minThreshold', 'Min Threshold')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('lastCost', 'Last Cost')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('status', 'Status')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-center">{tf('actions', 'Actions')}</th>
               </tr>
@@ -188,13 +190,13 @@ export const Inventory = () => {
             <tbody className="divide-y divide-border-subtle">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('syncing', 'Syncing...')}
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
                     {tf('noRecords', 'No inventory records found.')}
                   </td>
                 </tr>
@@ -208,6 +210,9 @@ export const Inventory = () => {
                     <td className="px-6 py-4 text-sm font-semibold text-text-muted capitalize">{tf(item.unit, item.unit)}</td>
                     <td className="px-6 py-4 text-sm font-bold text-text-muted">
                       {item.minQuantity} {tf(item.unit, item.unit)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-text-main">
+                      {item.lastPurchaseAmount > 0 ? formatCurrency(item.lastPurchaseAmount) : '—'}
                     </td>
                     <td className="px-6 py-4 text-xs font-bold">
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${getStatusBadge(item.status)}`}>
