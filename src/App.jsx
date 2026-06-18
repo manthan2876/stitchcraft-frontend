@@ -16,6 +16,7 @@ import EditOrder from './pages/EditOrder';
 import Payments from './pages/Payments';
 import Ledger from './pages/Ledger';
 import Delivery from './pages/Delivery';
+import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -41,6 +42,7 @@ export const App = () => {
                 <Route path="/payments" element={<Payments />} />
                 <Route path="/ledger" element={<Ledger />} />
                 <Route path="/deliveries" element={<Delivery />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 
