@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Customers from './pages/Customers';
 import CustomerDetails from './pages/CustomerDetails';
+import Orders from './pages/Orders';
+import NewOrder from './pages/NewOrder';
+import EditOrder from './pages/EditOrder';
 import NotFound from './pages/NotFound';
 
 export const App = () => {
@@ -29,6 +32,9 @@ export const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/customers/:id" element={<CustomerDetails />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/new-order" element={<NewOrder />} />
+                <Route path="/orders/:id/edit" element={<EditOrder />} />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Route>
 
