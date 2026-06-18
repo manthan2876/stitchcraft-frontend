@@ -25,6 +25,7 @@ export const NewOrder = () => {
 
   const [rawCustomers, setRawCustomers] = useState([]);
   const [karigars, setKarigars] = useState([]);
+  const [machines, setMachines] = useState([]);
   const [inventoryItems, setInventoryItems] = useState([]);
 
   // Aster state
@@ -32,8 +33,9 @@ export const NewOrder = () => {
   const [asterQuantity, setAsterQuantity] = useState('');
   const [asterInventoryItem, setAsterInventoryItem] = useState('');
 
-  // Karigar
+  // Karigar & Machine
   const [assignedKarigar, setAssignedKarigar] = useState('');
+  const [assignedMachine, setAssignedMachine] = useState('');
 
   // Measurement type — default Maap
   const [measurementType, setMeasurementType] = useState('Maap');
@@ -50,6 +52,10 @@ export const NewOrder = () => {
     api.get('/karigars').then(setKarigars).catch(err => {
       console.warn('Karigars not available:', err.message);
       setKarigars([]);
+    });
+    api.get('/machines').then(setMachines).catch(err => {
+      console.warn('Machines not available:', err.message);
+      setMachines([]);
     });
     api.get('/inventory').then(setInventoryItems).catch(err => {
       console.warn('Inventory not available:', err.message);
@@ -167,6 +173,7 @@ export const NewOrder = () => {
         asterQuantity: needsAster ? (parseFloat(asterQuantity) || 0) : 0,
         asterInventoryItem: needsAster ? (asterInventoryItem || undefined) : undefined,
         assignedKarigar: assignedKarigar || undefined,
+        assignedMachine: assignedMachine || undefined,
       };
 
       await api.post('/orders', orderData);
@@ -298,6 +305,18 @@ export const NewOrder = () => {
                   <option value="">-- {tf('unassigned', 'Unassigned')} --</option>
                   {karigars.filter(k => k.status === 'Active').map(k => (
                     <option key={k._id} value={k._id}>{k.name} ({k.specialization})</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Assign Machine */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-text-muted">{tf('assignMachine', 'Assign Machine')}</label>
+                <select value={assignedMachine} onChange={(e) => setAssignedMachine(e.target.value)}
+                  className="w-full px-4 py-3 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple transition-all text-sm font-semibold">
+                  <option value="">-- {tf('unassigned', 'Unassigned')} --</option>
+                  {machines.filter(m => m.status === 'Working').map(m => (
+                    <option key={m._id} value={m._id}>{m.name} ({m.type})</option>
                   ))}
                 </select>
               </div>

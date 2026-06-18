@@ -22,10 +22,12 @@ export const EditOrder = () => {
 
     const [formData, setFormData] = useState({
         orderId: '', customerName: '', apparelType: '', status: 'Incoming',
-        deliveryDate: '', price: '', fabric: '', needsAster: false, assignedKarigar: ''
+        deliveryDate: '', price: '', fabric: '', needsAster: false, assignedKarigar: '',
+        assignedMachine: ''
     });
 
     const [karigars, setKarigars] = useState([]);
+    const [machines, setMachines] = useState([]);
 
     // Helper with fallbacks for translations
     const tf = (key, fallback) => {
@@ -37,6 +39,10 @@ export const EditOrder = () => {
         api.get('/karigars').then(setKarigars).catch(err => {
             console.warn('Karigars not available yet:', err.message);
             setKarigars([]);
+        });
+        api.get('/machines').then(setMachines).catch(err => {
+            console.warn('Machines not available yet:', err.message);
+            setMachines([]);
         });
     }, []);
 
@@ -55,7 +61,8 @@ export const EditOrder = () => {
                     price: data.price,
                     fabric: data.fabric || '',
                     needsAster: data.needsAster || false,
-                    assignedKarigar: data.assignedKarigar ? (data.assignedKarigar._id || data.assignedKarigar) : ''
+                    assignedKarigar: data.assignedKarigar ? (data.assignedKarigar._id || data.assignedKarigar) : '',
+                    assignedMachine: data.assignedMachine ? (data.assignedMachine._id || data.assignedMachine) : ''
                 });
             } catch (err) {
                 console.error(err);
@@ -77,7 +84,8 @@ export const EditOrder = () => {
                  price: Number(formData.price),
                  fabric: formData.fabric,
                  needsAster: formData.needsAster,
-                 assignedKarigar: formData.assignedKarigar || null
+                 assignedKarigar: formData.assignedKarigar || null,
+                 assignedMachine: formData.assignedMachine || null
              });
             navigate('/orders');
         } catch (err) {
@@ -177,6 +185,21 @@ export const EditOrder = () => {
                                 <option value="">-- {tf('unassigned', 'Unassigned')} --</option>
                                 {karigars.filter(k => k.status === 'Active' || k._id === formData.assignedKarigar).map(k => (
                                     <option key={k._id} value={k._id}>{k.name} ({k.specialization})</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Assign Machine select */}
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('assignMachine', 'Assign Machine')}</label>
+                            <select
+                                value={formData.assignedMachine}
+                                onChange={(e) => setFormData({ ...formData, assignedMachine: e.target.value })}
+                                className="w-full px-4 py-3 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple transition-all font-bold cursor-pointer text-sm"
+                            >
+                                <option value="">-- {tf('unassigned', 'Unassigned')} --</option>
+                                {machines.filter(m => m.status === 'Working' || m._id === formData.assignedMachine).map(m => (
+                                    <option key={m._id} value={m._id}>{m.name} ({m.type})</option>
                                 ))}
                             </select>
                         </div>
