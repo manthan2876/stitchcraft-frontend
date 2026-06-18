@@ -368,14 +368,14 @@ export const OrderDetails = () => {
             ) : (
               <div className="flex flex-col gap-6">
                 {/* Display customer measurements */}
-                {order.measurements ? (
+                {(order.measurementsSnapshot || order.measurements) ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Shirt */}
-                    {order.measurements.shirt && Object.values(order.measurements.shirt).some(v => v > 0) && (
+                    {(order.measurementsSnapshot?.shirt || order.measurements?.shirt) && Object.values(order.measurementsSnapshot?.shirt || order.measurements?.shirt).some(v => v > 0) && (
                       <div className="flex flex-col gap-3">
                         <h4 className="text-xs font-bold text-text-main uppercase tracking-wider border-b border-border-subtle pb-1.5">{tf('shirtParameters', 'Shirt Parameters')}</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                          {Object.entries(order.measurements.shirt).map(([field, val]) => val > 0 && (
+                          {Object.entries(order.measurementsSnapshot?.shirt || order.measurements?.shirt).map(([field, val]) => val > 0 && (
                             <div key={`s-${field}`} className="bg-bg-secondary px-2.5 py-2 border border-border-subtle rounded-xl flex flex-col items-center">
                               <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf(field, field)}</span>
                               <span className="text-sm font-black text-text-main mt-0.5">{val}"</span>
@@ -386,11 +386,11 @@ export const OrderDetails = () => {
                     )}
 
                     {/* Pant */}
-                    {order.measurements.pant && Object.values(order.measurements.pant).some(v => v > 0) && (
+                    {(order.measurementsSnapshot?.pant || order.measurements?.pant) && Object.values(order.measurementsSnapshot?.pant || order.measurements?.pant).some(v => v > 0) && (
                       <div className="flex flex-col gap-3">
                         <h4 className="text-xs font-bold text-text-main uppercase tracking-wider border-b border-border-subtle pb-1.5">{tf('pantParameters', 'Pant Parameters')}</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                          {Object.entries(order.measurements.pant).map(([field, val]) => val > 0 && (
+                          {Object.entries(order.measurementsSnapshot?.pant || order.measurements?.pant).map(([field, val]) => val > 0 && (
                             <div key={`p-${field}`} className="bg-bg-secondary px-2.5 py-2 border border-border-subtle rounded-xl flex flex-col items-center">
                               <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf(field, field)}</span>
                               <span className="text-sm font-black text-text-main mt-0.5">{val}"</span>
@@ -406,12 +406,12 @@ export const OrderDetails = () => {
                   </div>
                 )}
 
-                {order.measurements?.others && (
+                {(order.measurementsSnapshot?.others || order.measurements?.others) && (
                   <div className="bg-bg-secondary border border-border-subtle rounded-xl p-4 text-xs">
                     <span className="font-bold text-color-accent-purple flex items-center gap-1 uppercase tracking-wider mb-2">
                       <MdBookmarkBorder /> {tf('specialSewingNotes', 'Special Sewing Notes')}
                     </span>
-                    <p className="text-text-main opacity-80 italic">"{order.measurements.others}"</p>
+                    <p className="text-text-main opacity-80 italic">"{order.measurementsSnapshot?.others || order.measurements?.others}"</p>
                   </div>
                 )}
               </div>
