@@ -14,6 +14,8 @@ import {
   MdNotifications,
   MdAssignmentInd,
   MdInventory,
+  MdAccountBalance,
+  MdReceiptLong,
 } from 'react-icons/md';
 import { GiScissors, GiSewingNeedle, GiSewingMachine } from 'react-icons/gi';
 
@@ -24,7 +26,9 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { name: t('dashboard'), path: '/dashboard', icon: <MdDashboard className="w-5 h-5" /> },
     { name: t('orders') !== 'orders' ? t('orders') : 'Orders', path: '/orders', icon: <MdAddCircle className="w-5 h-5" /> },
+    { name: t('invoices') !== 'invoices' ? t('invoices') : 'Invoices', path: '/invoices', icon: <MdReceiptLong className="w-5 h-5" /> },
     { name: t('payments') !== 'payments' ? t('payments') : 'Payments', path: '/payments', icon: <MdReceipt className="w-5 h-5" /> },
+    { name: t('ledger') !== 'ledger' ? t('ledger') : 'Ledger', path: '/ledger', icon: <MdAccountBalance className="w-5 h-5" /> },
     { name: t('deliveries') !== 'deliveries' ? t('deliveries') : 'Deliveries', path: '/deliveries', icon: <MdLocalShipping className="w-5 h-5" /> },
     { name: t('notifications') !== 'notifications' ? t('notifications') : 'Notifications', path: '/notifications', icon: <MdNotifications className="w-5 h-5" /> },
     { name: t('karigars') !== 'karigars' ? t('karigars') : 'Karigars', path: '/karigars', icon: <MdAssignmentInd className="w-5 h-5" /> },

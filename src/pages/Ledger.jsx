@@ -1,27 +1,49 @@
 /* src/pages/Ledger.jsx */
-import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import Card from '../components/common/Card';
-import LedgerRow from '../components/specific/LedgerRow';
-import { formatCurrency } from '../utils/formatters';
-import {
-  calculateTotalAdvances,
-  calculateTotalDues,
-  calculateTotalValue
-} from '../utils/calculations';
-import { RiVisaLine } from 'react-icons/ri';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  MdSearch,
+  MdFilterList,
+  MdFileDownload,
+  MdPrint,
+  MdTrendingUp,
+  MdTrendingDown,
+  MdInventory,
+  MdAccountBalanceWallet,
+  MdMoneyOff,
+  MdCheckCircle,
+} from 'react-icons/icons'; // Note: we can import from react-icons/md or similar
+import * as Icons from 'react-icons/md';
+
+const {
+  MdSearch: SearchIcon,
+  MdFilterList: FilterIcon,
+  MdFileDownload: DownloadIcon,
+  MdPrint: PrintIcon,
+  MdTrendingUp: UpIcon,
+  MdTrendingDown: DownIcon,
+  MdInventory: InventoryIcon,
+  MdAccountBalanceWallet: WalletIcon,
+  MdMoneyOff: ExpenseIcon,
+} = Icons;
 
 export const Ledger = () => {
-  const { transactions, orders } = useOutletContext() || {
-    transactions: [],
-    orders: []
-  };
-
-  const [activeCard, setActiveCard] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('All');
   const { t } = useLanguage();
+  const [journal, setJournal] = useState([]);
+  const [summary, setSummary] = useState({
+    totalSales: 0,
+    totalReceived: 0,
+    totalOutstanding: 0,
+    totalExpenses: 0,
+    totalFabricProfit: 0,
+    totalFabricCost: 0,
+  });
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All'); // 'All', 'Sales', 'Payments', 'Expenses', 'Material Cost'
 
   // Helper with fallbacks for translations
   const tf = (key, fallback) => {
@@ -29,266 +51,246 @@ export const Ledger = () => {
     return val === key ? fallback : val;
   };
 
-  // Ledger sums
-  const totalReceived = calculateTotalAdvances(orders);
-  const totalOutstanding = calculateTotalDues(orders);
-  const totalSales = calculateTotalValue(orders);
+  const fetchSummary = async () => {
+    try {
+      const data = await api.get('/ledger/summary');
+      setSummary(data);
+    } catch (err) {
+      console.error('Failed to fetch summary:', err);
+    }
+  };
 
-  // Filter transactions
-  const filteredTx = transactions.filter(tx => {
-    const matchesSearch = tx.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // In database/payment status schema, filterType corresponds to tx.status ('Paid', 'Partial', 'Pending') 
-    // or credit/debit transaction type if defined.
-    const matchesType = filterType === 'All' || tx.type === filterType || tx.status === filterType;
-    return matchesSearch && matchesType;
-  });
+  const fetchJournal = async () => {
+    setLoading(true);
+    try {
+      const data = await api.get(
+        `/ledger/journal?category=${filterCategory}&search=${encodeURIComponent(searchTerm)}`
+      );
+      setJournal(data);
+    } catch (err) {
+      console.error('Failed to fetch journal entries:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
+  useEffect(() => {
+    fetchJournal();
+  }, [filterCategory, searchTerm]);
 
   // Export to CSV Feature
   const downloadCSV = () => {
-    const headers = ['Date', 'Transaction ID', 'Customer', 'Description', 'Amount', 'Status', 'Method'];
-    const csvData = filteredTx.map(tx => [
-      new Date(tx.date).toLocaleDateString(),
-      tx.id,
-      tx.customerName,
-      tx.description,
-      tx.amount,
-      tx.status,
-      tx.paymentType
+    const headers = ['Date', 'Type', 'Description', 'Amount', 'Flow', 'Method'];
+    const csvData = journal.map(entry => [
+      new Date(entry.date).toLocaleDateString(),
+      entry.type,
+      entry.description,
+      entry.amount,
+      entry.flow,
+      entry.paymentMethod,
     ]);
 
     const csvContent = [headers.join(','), ...csvData.map(row => row.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `StitchCraft_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `StitchCraft_Ultimate_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
+  // Print Feature
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const cashInHand = Math.max(0, summary.totalReceived - summary.totalExpenses);
+
+  const getFlowBadgeClass = (flow) => {
+    return flow === 'In'
+      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+      : 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
+  };
+
+  const getTypeLabel = (type) => {
+    if (type === 'Sales') return tf('sales', 'Sales Booking');
+    if (type === 'Payment') return tf('payment', 'Payment Received');
+    if (type === 'Refund') return tf('refund', 'Refund Issued');
+    if (type === 'Expense') return tf('expense', 'Expense');
+    if (type === 'Material Consumption') return tf('materialConsumption', 'Material Consumption');
+    return type;
+  };
+
   return (
-    <div className="flex flex-col gap-8 select-none text-left">
-
-      {/* Financial Summary Panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Ledger Transaction Log (Col-span 2) */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="bg-bg-secondary rounded-[20px] border border-border-subtle overflow-hidden shadow-card">
-
-            {/* Header controls */}
-            <div className="p-6 border-b border-border-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-text-main tracking-wide">{tf('journalEntries', 'Journal Entries')}</h3>
-                <p className="text-xs text-text-muted mt-0.5 font-semibold">{tf('journalEntriesSub', 'Detailed historical audits of financial deposits and credits')}</p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                <button onClick={downloadCSV} className="btn-tactile-dark flex items-center gap-1.5 cursor-pointer">
-                  <span>{tf('downloadCsv', 'Download CSV')}</span>
-                </button>
-                <button className="btn-tactile-dark flex items-center gap-1.5 cursor-pointer">
-                  <span>{tf('exportPdf', 'Export PDF')}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Filter Toolbars */}
-            <div className="p-6 bg-bg-primary/25 border-b border-border-subtle flex flex-col md:flex-row items-center justify-between gap-4">
-              {/* Search */}
-              <div className="w-full md:w-[280px] relative">
-                <input
-                  type="text"
-                  placeholder={tf('searchLedgerPlaceholder', 'Search ledger...')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-bg-input border border-border-subtle text-xs rounded-xl px-3 py-2.5 pl-9 text-text-main placeholder:text-text-muted/50 outline-none focus:border-color-accent-purple/50 transition-all text-sm"
-                />
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted text-xs font-bold">🔍</span>
-              </div>
-
-              {/* Transaction Filters */}
-              <div className="flex items-center gap-2">
-                {['All', 'Paid', 'Partial', 'Pending'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setFilterType(type)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer border
-                      ${filterType === type
-                        ? 'bg-color-accent-purple border-color-accent-purple text-white-forced shadow-md'
-                        : 'filter-tab-inactive hover:text-text-main'}`}
-                  >
-                    {type === 'All' ? tf('allTransactions', 'All') : tf(type.toLowerCase(), type)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Transaction Grid */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-bg-primary/30 border-b border-border-subtle">
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('noCol', 'No.')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('dateCreated', 'Date')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('refId', 'Ref ID')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('description', 'Description')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('nominal', 'Nominal')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('status', 'Status')}</th>
-                    <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">{tf('actions', 'Actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {filteredTx.length === 0 ? (
-                    <tr>
-                      <td colSpan="7" className="px-6 py-12 text-center text-sm text-text-muted">
-                        {tf('noLedgerEntries', 'No ledger entry matches criteria.')}
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredTx.map((tx, idx) => (
-                      <LedgerRow
-                        key={tx.id}
-                        tx={tx}
-                        index={idx}
-                        onEdit={(t) => console.log('Edit', t)}
-                        onViewDetails={(t) => console.log('View', t)}
-                      />
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Right column - Card Widget & Breakdown */}
-        <div className="flex flex-col gap-8">
-
-          {/* Pembayaran & Biaya (Payments & Cost) Card */}
-          <Card className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-lg font-bold text-text-main tracking-wide">{tf('cashAccountCard', 'Cash Account Card')}</h3>
-              <p className="text-xs text-text-muted mt-0.5">{tf('cashAccountSub', 'Active tailoring merchant wallet details')}</p>
-            </div>
-
-            {/* Skeuomorphic blue credit card */}
-            <div
-              className={`w-full h-[190px] rounded-2xl p-6 bg-grad-card-blue flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-300
-                ${activeCard ? 'opacity-100 scale-100 shadow-blue-500/10' : 'opacity-40 grayscale scale-98 shadow-none'}`}
-            >
-              {/* CloudCash pattern lines */}
-              <div className="absolute top-0 right-0 left-0 bottom-0 opacity-15 pointer-events-none">
-                <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M-20 60 C 50 10, 150 90, 200 40 C 250 -10, 320 80, 420 20" fill="none" stroke="white" strokeWidth="4" />
-                  <path d="M-20 100 C 50 50, 150 130, 200 80 C 250 30, 320 120, 420 60" fill="none" stroke="white" strokeWidth="3" />
-                </svg>
-              </div>
-
-              {/* Card Top */}
-              <div className="flex items-start justify-between z-10 text-white-forced">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-extrabold text-white/70 uppercase tracking-widest">StitchCraft Card</span>
-                  <span className="text-xs font-bold text-white/95">Masterji Account</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-black italic tracking-wider flex items-center gap-1">
-                    <RiVisaLine className="w-8 h-8 text-white-forced" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Card Middle */}
-              <div className="z-10 text-white-forced font-mono text-lg font-black tracking-widest my-2.5">
-                5789 &nbsp; **** &nbsp; **** &nbsp; 2847
-              </div>
-
-              {/* Card Bottom */}
-              <div className="flex justify-between items-end z-10 text-white-forced">
-                <div className="flex flex-col">
-                  <span className="text-[8px] font-bold text-white/50 uppercase tracking-widest">{tf('cardHolder', 'Card Holder')}</span>
-                  <span className="text-xs font-black">Ramesh Masterji</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-bold text-white/50 uppercase tracking-widest">{tf('expires', 'Expires')}</span>
-                  <span className="text-xs font-black">06 / 31</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Dues Details */}
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between items-center py-2.5 border-b border-border-subtle">
-                <span className="text-xs text-text-muted font-bold uppercase tracking-wider">{tf('currentCashInHand', 'Current Cash In Hand')}</span>
-                <span className="text-lg font-black text-text-main">{formatCurrency(totalReceived)}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-2.5 border-b border-border-subtle">
-                <span className="text-xs text-text-muted font-bold uppercase tracking-wider">{tf('pendingDues', 'Pending Dues')}</span>
-                <span className="text-lg font-black text-color-accent-pink">{formatCurrency(totalOutstanding)}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-2.5">
-                <span className="text-xs text-text-muted font-bold uppercase tracking-wider">{tf('totalSalesBooked', 'Total Sales Booked')}</span>
-                <span className="text-lg font-black text-color-accent-emerald">{formatCurrency(totalSales)}</span>
-              </div>
-            </div>
-
-            {/* Monthly limit bar */}
-            <div className="flex flex-col gap-2.5 mt-2">
-              <div className="flex justify-between text-xs font-bold">
-                <span className="text-text-muted">{tf('monthlyExpenseLimit', 'Monthly Expense Limit')}</span>
-                <span className="text-text-main">{formatCurrency(6000)} / {formatCurrency(25000)}</span>
-              </div>
-              <div className="w-full h-2 bg-bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-color-accent-blue rounded-full shadow-inner" style={{ width: '24%' }}></div>
-              </div>
-            </div>
-
-            {/* Card active toggle */}
-            <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-2">
-              <span className="text-xs text-text-muted font-bold uppercase tracking-wider">{tf('cardPowerState', 'Card Active')}</span>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={activeCard}
-                  onChange={(e) => setActiveCard(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-bg-secondary border border-border-medium rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-color-accent-blue"></div>
-              </label>
-            </div>
-
-          </Card>
-        </div>
-
+    <div className="flex flex-col gap-8 select-none text-left pb-24">
+      {/* Printable Heading */}
+      <div className="hidden print:block mb-6 border-b border-border-strong pb-4">
+        <h1 className="text-2xl font-black text-black">StitchCraft Tailoring ERP - Financial Ledger</h1>
+        <p className="text-xs text-gray-500 mt-1">Generated on: {new Date().toLocaleString()}</p>
       </div>
 
-      {/* Sticky Bottom Ribbon Summary */}
-      <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-bg-secondary/95 backdrop-blur-md border-t border-border-subtle py-4 px-6 flex items-center justify-between z-30 shadow-2xl">
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('salesLedger', 'Sales Ledger')}</span>
-            <span className="text-sm font-black text-text-main">{formatCurrency(totalSales)}</span>
-          </div>
-          <div className="h-6 w-px bg-border-strong"></div>
-          <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('cashReceived', 'Cash Received')}</span>
-            <span className="text-sm font-black text-color-accent-blue">{formatCurrency(totalReceived)}</span>
-          </div>
-          <div className="h-6 w-px bg-border-strong"></div>
-          <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-text-muted uppercase tracking-wider">{tf('outstandingDues', 'Outstanding Dues')}</span>
-            <span className="text-sm font-black text-color-accent-pink">{formatCurrency(totalOutstanding)}</span>
-          </div>
-        </div>
+      {/* Header controls */}
+      <div className="flex items-center justify-between print:hidden">
         <div>
-          <span className="text-[9px] font-black text-color-accent-purple uppercase tracking-widest bg-color-accent-purple/10 px-2.5 py-1 rounded-md border border-color-accent-purple/20">
-            {tf('realtimeAudit', 'Real-time Audit')}
-          </span>
+          <h2 className="text-xl font-bold text-text-main tracking-wide">{tf('ultimateLedger', 'Ultimate Ledger')}</h2>
+          <p className="text-xs text-text-muted mt-0.5 font-semibold">
+            {tf('ultimateLedgerSub', 'Unified inflows/outflows of sales, client deposits, lining usage, and shop expenses')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button onClick={downloadCSV} className="btn-tactile-dark flex items-center gap-1.5 cursor-pointer text-xs py-2 px-3">
+            <DownloadIcon className="w-4 h-4 text-text-main" />
+            <span>{tf('downloadCsv', 'Download CSV')}</span>
+          </button>
+          <button onClick={handlePrint} className="btn-tactile-dark flex items-center gap-1.5 cursor-pointer text-xs py-2 px-3">
+            <PrintIcon className="w-4 h-4 text-text-main" />
+            <span>{tf('printLedger', 'Print Ledger')}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Financial Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="flex items-center gap-4 py-4 px-6 border-l-4 border-l-emerald-500 bg-bg-card">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+            <WalletIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('cashInHand', 'Cash in Hand')}</span>
+            <h3 className="text-lg font-black text-text-main mt-0.5">{formatCurrency(cashInHand)}</h3>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-4 py-4 px-6 border-l-4 border-l-blue-500 bg-bg-card">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+            <UpIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('totalSalesBooked', 'Total Sales Booked')}</span>
+            <h3 className="text-lg font-black text-text-main mt-0.5">{formatCurrency(summary.totalSales)}</h3>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-4 py-4 px-6 border-l-4 border-l-rose-500 bg-bg-card">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+            <ExpenseIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('generalExpenses', 'General Expenses')}</span>
+            <h3 className="text-lg font-black text-rose-500 mt-0.5">{formatCurrency(summary.totalExpenses)}</h3>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-4 py-4 px-6 border-l-4 border-l-purple-500 bg-bg-card">
+          <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-color-accent-purple">
+            <InventoryIcon className="w-6 h-6 text-color-accent-purple" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{tf('fabricLiningCost', 'Lining Material Cost')}</span>
+            <h3 className="text-lg font-black text-text-main mt-0.5">{formatCurrency(summary.totalFabricCost)}</h3>
+          </div>
+        </Card>
+      </div>
+
+      {/* Filters Card */}
+      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-6 print:hidden">
+        {/* Search */}
+        <div className="w-full md:w-[300px] relative">
+          <input
+            type="text"
+            placeholder={tf('searchLedgerPlaceholder', 'Search ledger entries...')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-bg-input border border-border-subtle text-xs rounded-xl px-3 py-2.5 pl-9 text-text-main placeholder:text-text-muted/50 outline-none focus:border-color-accent-purple/50 transition-all text-sm"
+          />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted w-4 h-4" />
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <FilterIcon className="text-text-muted w-4 h-4 mr-1 hidden sm:block" />
+          {[
+            { key: 'All', label: 'All' },
+            { key: 'Sales', label: 'Sales Booked' },
+            { key: 'Payments', label: 'Payments' },
+            { key: 'Expenses', label: 'Shop Expenses' },
+            { key: 'Material Cost', label: 'Lining Cost' },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFilterCategory(key)}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer border
+                ${filterCategory === key
+                  ? 'bg-color-accent-purple border-color-accent-purple text-white-forced shadow-md'
+                  : 'filter-tab-inactive hover:text-text-main'}`}
+            >
+              {tf(key.toLowerCase().replace(' ', ''), label)}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Ledger Journal Log Table */}
+      <div className="bg-bg-secondary rounded-[20px] border border-border-subtle overflow-hidden shadow-card">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-bg-primary/30 border-b border-border-subtle">
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('date', 'Date')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('description', 'Description')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('type', 'Type')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('method', 'Method')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('flow', 'Flow')}</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">{tf('amount', 'Amount')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-subtle">
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                    {tf('syncingLedger', 'Syncing ledger audit entries...')}
+                  </td>
+                </tr>
+              ) : journal.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-sm text-text-muted">
+                    {tf('noLedgerRecords', 'No ledger journal entries found.')}
+                  </td>
+                </tr>
+              ) : (
+                journal.map((entry) => (
+                  <tr key={entry._id} className="hover:bg-bg-hover transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-text-main">
+                      {formatDate(entry.date)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-bold text-text-main/90 max-w-xs md:max-w-md truncate">
+                      {entry.description}
+                    </td>
+                    <td className="px-6 py-4 text-xs font-semibold text-text-muted">
+                      {getTypeLabel(entry.type)}
+                    </td>
+                    <td className="px-6 py-4 text-xs font-medium text-text-muted">
+                      {entry.paymentMethod}
+                    </td>
+                    <td className="px-6 py-4 text-xs">
+                      <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getFlowBadgeClass(entry.flow)}`}>
+                        {entry.flow === 'In' ? tf('inflow', 'In') : tf('outflow', 'Out')}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 text-sm font-black text-right ${
+                      entry.flow === 'In' ? 'text-color-accent-emerald' : 'text-color-accent-pink'
+                    }`}>
+                      {entry.flow === 'In' ? '+' : '-'}{formatCurrency(entry.amount)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
