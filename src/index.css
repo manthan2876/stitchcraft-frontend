@@ -1,0 +1,278 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+@import "./styles/variables.css";
+@import "./styles/skeuomorphic.css";
+
+/* 1. Map design tokens to Tailwind v4 utilities */
+@theme {
+  --color-secondary: var(--color-bg-secondary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --shadow-card: var(--shadow-card);
+  --font-sans: "Outfit", "Inter", sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-main);
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom styled scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-primary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-bg-card);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-purple);
+  }
+
+  /* 8. Global Select Styling (Default Dark Chevron) */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b8a9f' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 0.85rem !important;
+    padding-right: 2.25rem !important;
+    cursor: pointer;
+  }
+
+  /* 7. Global Option styling for dropdown overlays */
+  select option {
+    background-color: var(--color-bg-secondary) !important;
+    color: var(--color-text-main) !important;
+    font-size: 0.875rem;
+    padding: 8px 12px;
+  }
+}
+
+/* Color Scheme support */
+.light-theme {
+  color-scheme: light;
+}
+
+/* 2, 3, & 4. Define missing utility classes */
+@layer utilities {
+  .bg-grad-purple {
+    background: var(--grad-purple);
+  }
+
+  .bg-grad-pink {
+    background: var(--grad-pink);
+  }
+
+  .bg-grad-card-blue {
+    background: var(--grad-card-blue);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  /* 9. Filter tab inactive utility */
+  .filter-tab-inactive {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--color-text-muted);
+  }
+
+  .light-theme .filter-tab-inactive {
+    background-color: rgba(122, 96, 255, 0.05);
+    border: 1px solid rgba(122, 96, 255, 0.12);
+  }
+
+  /* 5. Narrowed Semantic Text Overrides */
+  .text-on-surface {
+    color: var(--color-text-main);
+  }
+}
+
+/* Global Form Elements Theme Mapping */
+input,
+select,
+textarea {
+  background-color: var(--color-bg-primary);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-main);
+}
+
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background-color: #ffffff;
+  border-color: rgba(122, 96, 255, 0.2);
+  color: #151329;
+}
+
+/* 7. Light theme select options */
+.light-theme select option {
+  background-color: #ffffff !important;
+  color: #151329 !important;
+}
+
+/* 8. Light theme chevron with adjusted stroke color */
+.light-theme select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23625f82' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+}
+
+/* Global Placeholder Override */
+::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.light-theme ::placeholder {
+  color: #625f82;
+  opacity: 0.65;
+}
+
+/* ─── Light Theme Overrides ─── */
+.light-theme {
+
+  /* 6. Light Theme overrides for missing hex targets */
+  .bg-\[\#17152d\] {
+    background-color: #f0eeff !important;
+  }
+
+  .hover\:bg-\[\#2e2c56\]:hover {
+    background-color: #fcfcff !important;
+  }
+
+  .bg-white\/5,
+  .bg-white\/10 {
+    background-color: rgba(122, 96, 255, 0.05) !important;
+  }
+
+  .hover\:bg-white\/5:hover,
+  .hover\:bg-white\/10:hover {
+    background-color: rgba(122, 96, 255, 0.08) !important;
+  }
+
+  /* Keep high contrast on text inside colored buttons and badges */
+  .text-white-forced,
+  .text-white-forced * {
+    color: #ffffff !important;
+  }
+
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/20,
+  .border-white\/30,
+  .border-b.border-white\/5,
+  .border-r.border-white\/5,
+  .divide-white\/5>*+* {
+    border-color: rgba(122, 96, 255, 0.12) !important;
+  }
+
+  .bg-\[\#1e1c36\],
+  .bg-\[\#1e1c3a\],
+  .bg-bg-primary\/30 {
+    background-color: #f0eeff !important;
+    border-color: rgba(122, 96, 255, 0.12) !important;
+  }
+
+  .bg-secondary {
+    background-color: #ffffff !important;
+    border-color: rgba(122, 96, 255, 0.1) !important;
+  }
+
+  .delivery-active-tab {
+    background-color: #ede9ff !important;
+    border-color: var(--color-accent-purple) !important;
+    color: var(--color-accent-purple) !important;
+  }
+
+  .chart-grid-line {
+    stroke: rgba(122, 96, 255, 0.08) !important;
+  }
+
+  .calendar-inrange-text {
+    color: #312a6e !important;
+  }
+
+  .topbar-icon-btn {
+    background-color: #ede9ff !important;
+    border-color: rgba(122, 96, 255, 0.15) !important;
+  }
+
+  .topbar-icon-btn:hover {
+    background-color: #ddd8f7 !important;
+  }
+
+  .topbar-icon-btn .text-text-muted {
+    color: #625f82 !important;
+  }
+
+  .sidebar-active-tab::before {
+    box-shadow: 12px 12px 0 12px var(--color-bg-sidebar) !important;
+  }
+
+  .sidebar-active-tab::after {
+    box-shadow: 12px -12px 0 12px var(--color-bg-sidebar) !important;
+  }
+
+  .sidebar-active-tab {
+    background: linear-gradient(90deg, rgba(122, 96, 255, 0.12), transparent) !important;
+    color: var(--color-accent-purple) !important;
+  }
+
+  .btn-tactile-dark {
+    background-color: #ede9ff !important;
+    border-color: rgba(122, 96, 255, 0.15) !important;
+    color: #3b3880 !important;
+  }
+
+  .btn-tactile-dark:hover {
+    background-color: #ddd8f7 !important;
+    color: #1e1a5a !important;
+  }
+}
+
+.shop-active-card {
+  background: var(--shop-active-grad) !important;
+  border-color: var(--color-accent-purple) !important;
+}
+
+/* Native datepicker indicator theme color invert */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.light-theme input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+  opacity: 0.6;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
