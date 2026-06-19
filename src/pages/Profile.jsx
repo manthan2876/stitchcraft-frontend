@@ -9,7 +9,7 @@ import { api } from '../services/api';
 import {
   MdPerson, MdEmail, MdBusiness, MdEdit, MdSave,
   MdLogout, MdPalette, MdNotifications, MdSecurity, MdStorefront,
-  MdClose, MdCheck, MdAdd, MdDelete
+  MdClose, MdCheck, MdAdd, MdDelete, MdCloudDownload
 } from 'react-icons/md';
 import ProfileImage from '../assets/profile.png';
 import { uploadToPrivateBucket, getSignedUrl } from '../services/supabase';
@@ -28,6 +28,87 @@ export const Profile = () => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Data Privacy and Account Deletion States
+  const [privacyAction, setPrivacyAction] = useState(null); // 'DOWNLOAD' | 'WIPE' | 'DELETE_ACCOUNT'
+  const [privacyPassword, setPrivacyPassword] = useState('');
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [privacyError, setPrivacyError] = useState('');
+  const [privacyLoading, setPrivacyLoading] = useState(false);
+
+  const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+  const [deletionReason, setDeletionReason] = useState('');
+  const [reasonLoading, setReasonLoading] = useState(false);
+
+  const handleActionClick = (type) => {
+    setPrivacyAction(type);
+    setPrivacyPassword('');
+    setPrivacyError('');
+    setPrivacyLoading(false);
+    setIsPrivacyModalOpen(true);
+  };
+
+  const handlePrivacyPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPrivacyError('');
+    setPrivacyLoading(true);
+
+    try {
+      if (privacyAction === 'DOWNLOAD') {
+        const response = await api.post('/auth/account/download-data', { password: privacyPassword });
+        
+        // Trigger file download
+        const blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `stitchcraft_data_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        setIsPrivacyModalOpen(false);
+        setPrivacyPassword('');
+        alert('Data downloaded successfully!');
+      } else if (privacyAction === 'WIPE') {
+        await api.post('/auth/account/delete-all-data', { password: privacyPassword });
+        setIsPrivacyModalOpen(false);
+        setPrivacyPassword('');
+        alert('All shop records have been permanently deleted.');
+      } else if (privacyAction === 'DELETE_ACCOUNT') {
+        // Verify password
+        await api.post('/auth/verify-password', { password: privacyPassword });
+        setIsPrivacyModalOpen(false);
+        setDeletionReason('');
+        setIsReasonModalOpen(true);
+      }
+    } catch (err) {
+      setPrivacyError(err.message || 'Verification failed. Please try again.');
+    } finally {
+      setPrivacyLoading(false);
+    }
+  };
+
+  const handleDeletionReasonSubmit = async (e) => {
+    e.preventDefault();
+    setReasonLoading(true);
+
+    try {
+      await api.post('/auth/account/delete-account', {
+        password: privacyPassword,
+        reason: deletionReason
+      });
+      setIsReasonModalOpen(false);
+      setPrivacyPassword('');
+      alert('Your account deletion request has been registered. You will now be logged out. You can reactivate your account anytime within the next 15 days by logging back in.');
+      handleLogout();
+    } catch (err) {
+      alert(err.message || 'Failed to process account deletion request.');
+    } finally {
+      setReasonLoading(false);
+    }
+  };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -608,15 +689,56 @@ export const Profile = () => {
             ))}
           </div>
 
-          <div className="border border-rose-500/20 bg-rose-500/5 rounded-2xl p-4 flex flex-col gap-3">
+          <div className="border border-rose-500/20 bg-rose-500/5 rounded-2xl p-4 flex flex-col gap-4">
             <p className="text-xs font-bold text-rose-500 uppercase tracking-wider">⚠ {t('accountActions')}</p>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-sm font-bold hover:bg-rose-500/20 transition-all cursor-pointer w-full justify-center"
-            >
-              <MdLogout className="w-4 h-4" />
-              {t('signOut')}
-            </button>
+            
+            {/* Download Data */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-bg-secondary border border-border-subtle rounded-xl p-4">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-text-main">{t('downloadData')}</p>
+                <p className="text-xs text-text-muted mt-1 font-semibold">{t('downloadDataDesc')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleActionClick('DOWNLOAD')}
+                className="px-4 py-2.5 bg-color-accent-purple/10 border border-color-accent-purple/20 text-color-accent-purple rounded-xl text-xs font-bold hover:bg-color-accent-purple/20 transition-all cursor-pointer whitespace-nowrap self-start sm:self-center flex items-center gap-1.5"
+              >
+                <MdCloudDownload className="w-4 h-4" />
+                {t('downloadData')}
+              </button>
+            </div>
+
+            {/* Wipe Data */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-bg-secondary border border-rose-500/20 rounded-xl p-4">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-rose-500">{t('wipeData')}</p>
+                <p className="text-xs text-text-muted mt-1 font-semibold">{t('wipeDataDesc')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleActionClick('WIPE')}
+                className="px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-500/20 transition-all cursor-pointer whitespace-nowrap self-start sm:self-center flex items-center gap-1.5"
+              >
+                <MdDelete className="w-4 h-4" />
+                {t('wipeData')}
+              </button>
+            </div>
+
+            {/* Delete Account */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-bg-secondary border border-rose-600/30 rounded-xl p-4">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-rose-600">{t('deleteAccount')}</p>
+                <p className="text-xs text-text-muted mt-1 font-semibold">{t('deleteAccountDesc')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleActionClick('DELETE_ACCOUNT')}
+                className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white-forced rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap self-start sm:self-center flex items-center gap-1.5"
+              >
+                <MdDelete className="w-4 h-4" />
+                {t('deleteAccount')}
+              </button>
+            </div>
           </div>
         </Card>
       )}
@@ -820,6 +942,116 @@ export const Profile = () => {
                 {deleteShopLoading ? t('saving') : t('deleteShop')}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Confirmation Modal */}
+      {isPrivacyModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-[420px] bg-bg-modal border border-border-medium rounded-[24px] p-6 shadow-2xl relative text-left">
+            <button
+              onClick={() => setIsPrivacyModalOpen(false)}
+              className="absolute right-4 top-4 p-1.5 rounded-lg bg-bg-secondary border border-border-subtle text-text-muted hover:text-text-main cursor-pointer"
+            >
+              <MdClose className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-black text-text-main flex items-center gap-2 mb-2">
+              <MdSecurity className="text-color-accent-purple w-5 h-5" />
+              {t('confirmActionTitle')}
+            </h3>
+            <p className="text-xs text-text-muted mb-4 font-semibold">
+              {t('confirmActionDesc')}
+            </p>
+
+            <form onSubmit={handlePrivacyPasswordSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <input
+                  type="password"
+                  required
+                  value={privacyPassword}
+                  onChange={e => { setPrivacyPassword(e.target.value); setPrivacyError(''); }}
+                  placeholder={t('enterPasswordPlaceholder')}
+                  className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all placeholder:text-text-muted/50"
+                  autoFocus
+                />
+              </div>
+
+              {privacyError && (
+                <span className="text-xs text-color-accent-pink font-bold text-center block animate-pulse">
+                  {privacyError}
+                </span>
+              )}
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPrivacyModalOpen(false)}
+                  className="flex-1 py-2.5 btn-tactile-dark font-bold text-sm transition-all cursor-pointer"
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={privacyLoading}
+                  className="flex-1 py-2.5 bg-color-accent-purple text-white-forced rounded-xl font-bold text-sm shadow-lg shadow-color-accent-purple/20 hover:bg-color-accent-purple/90 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {privacyLoading ? t('loadingAction') : t('confirm')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Account Deletion Reason Modal */}
+      {isReasonModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-[420px] bg-bg-modal border border-border-medium rounded-[24px] p-6 shadow-2xl relative text-left">
+            <button
+              onClick={() => setIsReasonModalOpen(false)}
+              className="absolute right-4 top-4 p-1.5 rounded-lg bg-bg-secondary border border-border-subtle text-text-muted hover:text-text-main cursor-pointer"
+            >
+              <MdClose className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-black text-text-main flex items-center gap-2 mb-2">
+              <MdDelete className="text-color-accent-pink w-5 h-5" />
+              {t('deleteReasonTitle')}
+            </h3>
+            <p className="text-xs text-text-muted mb-4 font-semibold">
+              {t('deleteReasonDesc')}
+            </p>
+
+            <form onSubmit={handleDeletionReasonSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <textarea
+                  value={deletionReason}
+                  onChange={e => setDeletionReason(e.target.value)}
+                  placeholder={t('deleteReasonPlaceholder')}
+                  className="w-full h-24 px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all placeholder:text-text-muted/50 resize-none font-semibold"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReasonModalOpen(false)}
+                  className="flex-1 py-2.5 btn-tactile-dark font-bold text-sm transition-all cursor-pointer"
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={reasonLoading}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white-forced rounded-xl font-bold text-sm shadow-lg shadow-rose-950/20 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {reasonLoading ? t('loadingAction') : t('deleteAccount')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
