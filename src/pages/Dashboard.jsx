@@ -50,6 +50,24 @@ const getSvgPath = (points) => {
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [settings] = useState(() => {
+    const saved = localStorage.getItem('stitchcraft_settings');
+    const defaultSettings = {
+      showStatsCards: true,
+      showRecentOrders: true,
+      showWeeklyStitching: true,
+      showPerformanceTracking: true,
+      showCalendar: true,
+      showReminders: true,
+    };
+    if (!saved) return defaultSettings;
+    try {
+      const parsed = JSON.parse(saved);
+      return { ...defaultSettings, ...parsed };
+    } catch (e) {
+      return defaultSettings;
+    }
+  });
   const tf = (key, fallback) => {
     const val = t(key);
     return val === key ? fallback : val;
@@ -188,467 +206,507 @@ export const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-6 select-none">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title={t('todayDelivery')}
-          value={loading ? '—' : stats.todayDelivery}
-          subtitle={t('todayDeliverySub')}
-          variant="blue"
-          icon={<MdTimer className="w-6 h-6 text-white-forced" />}
-          onClick={() => navigate('/deliveries?tab=Today')}
-        />
-        <StatCard
-          title={t('lateDelivery')}
-          value={loading ? '—' : stats.lateDelivery}
-          subtitle={t('lateDeliverySub')}
-          variant="pink"
-          icon={<MdWarning className="w-6 h-6 text-white-forced animate-bounce" />}
-          onClick={() => navigate('/deliveries?tab=Late')}
-        />
-        <StatCard
-          title={t('incomingOrdersCount')}
-          value={loading ? '—' : stats.incomingOrders}
-          subtitle={t('incomingOrdersSub')}
-          variant="purple"
-          icon={<GiSewingMachine className="w-6 h-6 text-white-forced" />}
-          onClick={() => navigate('/orders?status=Incoming')}
-        />
-        <StatCard
-          title={t('totalCustomers')}
-          value={loading ? '—' : stats.totalCustomers}
-          subtitle={t('totalCustomersSub')}
-          variant="emerald"
-          icon={<MdPeople className="w-6 h-6 text-white-forced" />}
-          onClick={() => navigate('/customers')}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col gap-6 text-left">
-          <RecentOrders
-            orders={filteredOrders}
-            onUpdateStatus={updateOrderStatus}
-            onEditOrder={(order) => navigate(`/orders/${order._id}/edit`)}
+      {settings.showStatsCards && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title={t('todayDelivery')}
+            value={loading ? '—' : stats.todayDelivery}
+            subtitle={t('todayDeliverySub')}
+            variant="blue"
+            icon={<MdTimer className="w-6 h-6 text-white-forced" />}
+            onClick={() => navigate('/deliveries?tab=Today')}
           />
+          <StatCard
+            title={t('lateDelivery')}
+            value={loading ? '—' : stats.lateDelivery}
+            subtitle={t('lateDeliverySub')}
+            variant="pink"
+            icon={<MdWarning className="w-6 h-6 text-white-forced animate-bounce" />}
+            onClick={() => navigate('/deliveries?tab=Late')}
+          />
+          <StatCard
+            title={t('incomingOrdersCount')}
+            value={loading ? '—' : stats.incomingOrders}
+            subtitle={t('incomingOrdersSub')}
+            variant="purple"
+            icon={<GiSewingMachine className="w-6 h-6 text-white-forced" />}
+            onClick={() => navigate('/orders?status=Incoming')}
+          />
+          <StatCard
+            title={t('totalCustomers')}
+            value={loading ? '—' : stats.totalCustomers}
+            subtitle={t('totalCustomersSub')}
+            variant="emerald"
+            icon={<MdPeople className="w-6 h-6 text-white-forced" />}
+            onClick={() => navigate('/customers')}
+          />
+        </div>
+      )}
 
-          <Card className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-lg font-bold text-text-main tracking-wide">{t('weeklyStitching')}</h3>
-              <p className="text-xs text-text-muted mt-0.5">{t('weeklyStitchingSub')}</p>
-            </div>
-            <div className="relative bg-bg-secondary border border-border-subtle rounded-2xl p-4 overflow-hidden">
-              <div
-                className="absolute px-2.5 py-1.5 rounded-xl text-[10px] font-black shadow-xl shadow-color-accent-purple/30 transition-all duration-300 -translate-x-1/2 pointer-events-none select-none z-10 border border-border-medium"
-                style={{
-                  left: `${tooltipLeft}px`,
-                  top: `${tooltipTop}px`,
-                  backgroundColor: '#7a60ff',
-                  color: '#ffffff'
-                }}
-              >
-                {formatCurrency(activeVal)}
+      {(() => {
+        const showLeftCol = settings.showRecentOrders || settings.showWeeklyStitching || settings.showPerformanceTracking;
+        const showRightCol = settings.showCalendar || settings.showReminders;
+
+        if (!showLeftCol && !showRightCol) {
+          return (
+            <Card className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-bg-secondary border border-border-subtle flex items-center justify-center text-text-muted mb-4 shadow-inner">
+                <MdNotificationsActive className="w-8 h-8 text-color-accent-purple" />
               </div>
+              <h3 className="text-lg font-bold text-text-main">Dashboard is Empty</h3>
+              <p className="text-xs text-text-muted max-w-sm mt-1 mb-6 font-semibold">
+                All widgets are hidden. Go to Settings to select the graphs and data cards you want to see.
+              </p>
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-6 py-2.5 bg-color-accent-purple text-white-forced rounded-xl font-bold text-xs shadow-lg shadow-color-accent-purple/20 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+              >
+                Go to Settings
+              </button>
+            </Card>
+          );
+        }
 
-              <svg className="w-full h-[160px]" viewBox="0 0 500 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="glowWave" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7a60ff" stopOpacity="0.45" />
-                    <stop offset="100%" stopColor="#7a60ff" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <line x1="0" y1="40" x2="500" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
-                <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
-                <line x1="0" y1="120" x2="500" y2="120" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
-
-                <path d={fillPath} fill="url(#glowWave)" className="transition-all duration-500 ease-in-out" />
-                <path d={linePath} fill="none" stroke="#7a60ff" strokeWidth="3.5" className="transition-all duration-500 ease-in-out" />
-
-                <circle
-                  cx={activePoint[0]}
-                  cy={activePoint[1]}
-                  r="5"
-                  fill="#7a60ff"
-                  stroke="#ffffff"
-                  strokeWidth="2.5"
-                  className="animate-ping transition-all duration-300"
-                  style={{ transformOrigin: `${activePoint[0]}px ${activePoint[1]}px` }}
-                />
-                <circle
-                  cx={activePoint[0]}
-                  cy={activePoint[1]}
-                  r="5"
-                  fill="#7a60ff"
-                  stroke="#ffffff"
-                  strokeWidth="2.5"
-                  className="transition-all duration-300"
-                />
-
-                {points.map((p, idx) => (
-                  <rect
-                    key={idx}
-                    x={p[0] - 38}
-                    y="0"
-                    width="76"
-                    height="160"
-                    fill="transparent"
-                    className="cursor-pointer"
-                    onMouseEnter={() => setActiveDayIdx(idx)}
+        return (
+          <div className={`grid grid-cols-1 ${showLeftCol && showRightCol ? 'lg:grid-cols-3' : ''} gap-8`}>
+            {showLeftCol && (
+              <div className={`${showLeftCol && showRightCol ? 'lg:col-span-2' : 'w-full'} flex flex-col gap-6 text-left`}>
+                {settings.showRecentOrders && (
+                  <RecentOrders
+                    orders={filteredOrders}
+                    onUpdateStatus={updateOrderStatus}
+                    onEditOrder={(order) => navigate(`/orders/${order._id}/edit`)}
                   />
-                ))}
-              </svg>
-            </div>
+                )}
 
-            <div className="flex justify-between px-2 text-[10px] font-bold text-text-muted/80 uppercase tracking-widest">
-              {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((key, idx) => (
-                <span
-                  key={key}
-                  className={`cursor-pointer transition-all duration-200 ${activeDayIdx === idx
-                    ? 'text-color-accent-purple font-black scale-110'
-                    : 'hover:text-text-main'
-                    }`}
-                  onMouseEnter={() => setActiveDayIdx(idx)}
-                >
-                  {t(key)}
-                </span>
-              ))}
-            </div>
-          </Card>
-
-          {/* Performance Tracking Section */}
-          <Card className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-lg font-bold text-text-main tracking-wide">{tf('performanceTracking', 'Performance Tracking')}</h3>
-                <p className="text-xs text-text-muted mt-0.5">{tf('performanceTrackingSub', 'Monitor artisan workloads and machinery utilization')}</p>
-              </div>
-              <div className="flex bg-bg-secondary p-1 rounded-xl border border-border-subtle">
-                <button
-                  type="button"
-                  onClick={() => setPerfTab('Karigars')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    perfTab === 'Karigars' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
-                  }`}
-                >
-                  {tf('karigars', 'Karigars')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPerfTab('Machines')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                    perfTab === 'Machines' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
-                  }`}
-                >
-                  {tf('machines', 'Machines')}
-                </button>
-              </div>
-            </div>
-
-            {perfTab === 'Karigars' ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-border-subtle text-[10px] text-text-muted uppercase tracking-widest font-black">
-                      <th className="pb-3 text-left">{tf('artisanName', 'Artisan')}</th>
-                      <th className="pb-3 text-center">{tf('activeJobsCount', 'Active Workload')}</th>
-                      <th className="pb-3 text-right">{tf('earningsValue', 'Value Generated')}</th>
-                      <th className="pb-3 text-right">{tf('timelinessRate', 'On-Time Rate')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-subtle font-semibold">
-                    {!stats.karigarPerformance || stats.karigarPerformance.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="py-6 text-center text-xs text-text-muted font-bold">
-                          {tf('noArtisans', 'No artisan performance metrics found.')}
-                        </td>
-                      </tr>
-                    ) : (
-                      stats.karigarPerformance.map((k) => (
-                        <tr key={k._id} className="hover:bg-bg-hover/30 transition-colors">
-                          <td className="py-3 text-sm font-semibold text-text-main">
-                            <Link to={`/karigars/${k._id}`} className="text-color-accent-purple hover:underline font-bold">
-                              {k.name}
-                            </Link>
-                            <span className="text-[9px] text-text-muted block font-extrabold mt-0.5 uppercase tracking-wide">
-                              {k.specialization}
-                            </span>
-                          </td>
-                          <td className="py-3 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                              k.activeCount > 3
-                                ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                                : k.activeCount > 0
-                                ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                                : 'bg-gray-500/10 text-gray-500 border border-gray-500/20'
-                            }`}>
-                              {k.activeCount} active
-                            </span>
-                          </td>
-                          <td className="py-3 text-sm font-bold text-color-accent-emerald text-right">
-                            {formatCurrency(k.completedValue)}
-                          </td>
-                          <td className="py-3 text-right">
-                            <div className="flex flex-col items-end gap-1">
-                              <span className="text-xs font-black text-text-main">{k.onTimeRate}%</span>
-                              <div className="w-20 bg-bg-hover h-1.5 rounded-full overflow-hidden border border-border-subtle">
-                                <div
-                                  style={{ width: `${k.onTimeRate}%` }}
-                                  className={`h-full rounded-full ${
-                                    k.onTimeRate >= 80 ? 'bg-emerald-500' : k.onTimeRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                                  }`}
-                                />
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-border-subtle text-[10px] text-text-muted uppercase tracking-widest font-black">
-                      <th className="pb-3 text-left">{tf('machineNameNum', 'Machine')}</th>
-                      <th className="pb-3 text-center">{tf('status', 'Status')}</th>
-                      <th className="pb-3 text-center">{tf('activeJobs', 'Active Jobs')}</th>
-                      <th className="pb-3 text-right">{tf('totalUsage', 'Total Processed')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-subtle font-semibold">
-                    {!stats.machinePerformance || stats.machinePerformance.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="py-6 text-center text-xs text-text-muted font-bold">
-                          {tf('noMachines', 'No machine performance records found.')}
-                        </td>
-                      </tr>
-                    ) : (
-                      stats.machinePerformance.map((m) => (
-                        <tr key={m._id} className="hover:bg-bg-hover/30 transition-colors">
-                          <td className="py-3 text-sm font-semibold text-text-main flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-color-accent-purple shrink-0">
-                              <GiSewingMachine className="w-5 h-5 text-color-accent-purple" />
-                            </div>
-                            <div>
-                              <span className="font-bold block text-text-main leading-tight">{m.name}</span>
-                              <span className="text-[9px] text-text-muted font-extrabold uppercase tracking-wider">{m.type}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                              m.status === 'Working'
-                                ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                                : m.status === 'Maintenance'
-                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                            }`}>
-                              {m.status}
-                            </span>
-                          </td>
-                          <td className="py-3 text-center text-xs font-bold text-text-main">
-                            {m.activeCount}
-                          </td>
-                          <td className="py-3 text-sm font-black text-text-main text-right">
-                            {m.totalCount} jobs
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
-        </div>
-
-        <div className="flex flex-col gap-6 text-left">
-          {/* Calendar Widget */}
-          <Card className="flex flex-col gap-3">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <div className="flex items-center gap-1">
-                <button onClick={handlePrevMonth} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
-                  <MdChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-sm font-bold text-text-main tracking-wide w-[72px] text-center">{t(calendarMonth.toLowerCase())}</span>
-                <button onClick={handleNextMonth} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
-                  <MdChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex items-center gap-1">
-                <button onClick={handlePrevYear} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
-                  <MdChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-sm font-bold text-text-main tracking-wide w-12 text-center">{calendarYear}</span>
-                <button onClick={handleNextYear} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
-                  <MdChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {(selectedRange.start || selectedRange.end) && (
-              <div className="flex items-center justify-between text-[10px] font-bold px-1">
-                <span className="text-color-accent-blue uppercase tracking-wider">
-                  {selectedRange.start && !selectedRange.end
-                    ? t('calendarClickEnd')
-                    : `${selectedRange.start} – ${selectedRange.end} ${t(calendarMonth.toLowerCase())}`}
-                </span>
-                <button
-                  onClick={() => setSelectedRange({ start: null, end: null })}
-                  className="text-text-muted hover:text-text-main cursor-pointer"
-                >
-                  <MdClose className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-
-            <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-text-muted uppercase tracking-widest">
-              {['sun_short', 'mon_short', 'tue_short', 'wed_short', 'thu_short', 'fri_short', 'sat_short'].map((key, i) => (
-                <span key={i} className={i === 0 || i === 6 ? 'text-color-accent-pink/70' : ''}>{t(key)}</span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-y-2 text-center text-xs font-bold mt-2">
-              {[...Array(firstDayOffset)].map((_, i) => (
-                <div key={`e${i}`} />
-              ))}
-
-              {[...Array(daysInMonth)].map((_, i) => {
-                const day = i + 1;
-                const isStart = selectedRange.start === day;
-                const isEnd = selectedRange.end === day;
-                const isPending = selectedRange.start && !selectedRange.end && day === selectedRange.start;
-                const isToday = isCurrentMonthYear && day === todayDay;
-                const inRange = selectedRange.start && selectedRange.end
-                  && day >= selectedRange.start && day <= selectedRange.end;
-
-                const col = (firstDayOffset + day - 1) % 7;
-                let containerClass = 'relative w-full h-8 flex items-center justify-center cursor-pointer';
-
-                let stripClass = '';
-                let hasUpBridge = false;
-                let hasStartOutfill = false;
-                let hasEndOutfill = false;
-                if (selectedRange.start && selectedRange.end && selectedRange.start !== selectedRange.end) {
-                  if (inRange) {
-                    stripClass = 'absolute inset-0 bg-[var(--calendar-range-bg)] z-0';
-                    const hasUp = day - 7 >= selectedRange.start;
-                    const hasDown = day + 7 <= selectedRange.end;
-                    const hasLeft = col > 0 && day - 1 >= selectedRange.start;
-                    const hasRight = col < 6 && day + 1 <= selectedRange.end;
-
-                    if (!hasUp && !hasLeft) stripClass += ' rounded-tl-[14px]';
-                    if (!hasUp && !hasRight) stripClass += ' rounded-tr-[14px]';
-                    if (!hasDown && !hasLeft) stripClass += ' rounded-bl-[14px]';
-                    if (!hasDown && !hasRight) stripClass += ' rounded-br-[14px]';
-
-                    if (hasUp) hasUpBridge = true;
-                    if (isStart && hasDown && col > 0) hasStartOutfill = true;
-                    if (isEnd && hasUp && col < 6) hasEndOutfill = true;
-                  }
-                }
-
-                let circleClass = 'w-8 h-8 flex items-center justify-center rounded-full transition-all duration-150 text-xs z-10 relative';
-
-                if (isStart || isEnd) {
-                  circleClass += ' bg-[#007aff] text-white-forced font-black shadow-lg shadow-[#007aff]/40 scale-105';
-                } else if (isPending) {
-                  circleClass += ' bg-[#007aff]/30 text-white-forced font-extrabold ring-2 ring-[#007aff]/50 ring-offset-2 ring-offset-[var(--bg-primary)]';
-                } else if (isToday) {
-                  circleClass += ' ring-2 ring-[#7a60ff]/60 text-[#7a60ff] font-extrabold';
-                } else if (inRange) {
-                  circleClass += ' calendar-inrange-text font-bold';
-                } else {
-                  circleClass += ' text-text-muted hover:bg-bg-hover hover:text-text-main';
-                }
-
-                return (
-                  <div key={day} className={containerClass} onClick={() => handleDayClick(day)}>
-                    {stripClass && <div className={stripClass} />}
-                    {hasUpBridge && (
-                      <div className="absolute bottom-full left-0 w-full h-2 bg-[var(--calendar-range-bg)] z-0" />
-                    )}
-                    {hasStartOutfill && (
-                      <div
-                        className="absolute top-full right-full w-4 h-4 z-0 pointer-events-none"
-                        style={{ background: 'radial-gradient(circle at top left, transparent 16px, var(--calendar-range-color) 16.5px)' }}
-                      />
-                    )}
-                    {hasEndOutfill && (
-                      <div
-                        className="absolute bottom-full left-full w-4 h-4 z-0 pointer-events-none"
-                        style={{ background: 'radial-gradient(circle at bottom right, transparent 16px, var(--calendar-range-color) 16.5px)' }}
-                      />
-                    )}
-                    <span className={circleClass}>{day}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center gap-2 mt-1 border-t border-border-subtle pt-3">
-              <button
-                onClick={() => setSelectedRange({ start: null, end: null })}
-                className="flex-1 py-2 rounded-xl bg-bg-hover hover:bg-border-medium text-xs text-text-main font-bold active:scale-95 transition-all cursor-pointer border border-border-subtle"
-              >
-                {t('calendarClear')}
-              </button>
-              <button
-                disabled={!selectedRange.start || !selectedRange.end}
-                className="flex-1 py-2 rounded-xl bg-color-accent-blue text-xs text-white-forced font-bold hover:bg-color-accent-blue/90 active:scale-95 transition-all shadow-md shadow-color-accent-blue/20 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {selectedRange.start && selectedRange.end
-                  ? `${filteredOrders.length} ${t('ordersFound')}`
-                  : t('calendarApplyRange')}
-              </button>
-            </div>
-          </Card>
-
-          {/* Reminders Feed */}
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <div>
-                <h3 className="text-base font-bold text-text-main tracking-wide">{t('todayReminders')}</h3>
-                <p className="text-xs text-text-muted mt-0.5">{t('todayRemindersSub')}</p>
-              </div>
-              <MdNotificationsActive className="w-5 h-5 text-color-accent-pink animate-pulse" />
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {stats.reminders.length === 0 ? (
-                <div className="text-xs text-text-muted text-center py-6">
-                  {t('noReminders')}
-                </div>
-              ) : (
-                stats.reminders.map((alert) => (
-                  <div
-                    key={alert._id}
-                    className="p-3 bg-bg-secondary border border-border-subtle rounded-xl flex items-start gap-3 hover:border-border-medium transition-colors"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-color-accent-pink shrink-0 mt-1.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-text-main font-semibold leading-relaxed text-left">
-                        {alert.message}
-                      </p>
-                      <span className="text-[9px] text-text-muted font-bold block mt-1 uppercase tracking-wider">
-                        {formatDate(alert.createdAt)}
-                      </span>
+                {settings.showWeeklyStitching && (
+                  <Card className="flex flex-col gap-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-text-main tracking-wide">{t('weeklyStitching')}</h3>
+                      <p className="text-xs text-text-muted mt-0.5">{t('weeklyStitchingSub')}</p>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                    <div className="relative bg-bg-secondary border border-border-subtle rounded-2xl p-4 overflow-hidden">
+                      <div
+                        className="absolute px-2.5 py-1.5 rounded-xl text-[10px] font-black shadow-xl shadow-color-accent-purple/30 transition-all duration-300 -translate-x-1/2 pointer-events-none select-none z-10 border border-border-medium"
+                        style={{
+                          left: `${tooltipLeft}px`,
+                          top: `${tooltipTop}px`,
+                          backgroundColor: '#7a60ff',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {formatCurrency(activeVal)}
+                      </div>
 
-            <Link
-              to="/notifications"
-              className="mt-2 text-xs font-bold text-color-accent-purple hover:underline flex items-center justify-center gap-1"
-            >
-              <span>{t('viewFeed')}</span>
-              <MdArrowForward className="w-3.5 h-3.5" />
-            </Link>
-          </Card>
-        </div>
-      </div>
+                      <svg className="w-full h-[160px]" viewBox="0 0 500 160" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="glowWave" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#7a60ff" stopOpacity="0.45" />
+                            <stop offset="100%" stopColor="#7a60ff" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <line x1="0" y1="40" x2="500" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
+                        <line x1="0" y1="80" x2="500" y2="80" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
+                        <line x1="0" y1="120" x2="500" y2="120" stroke="rgba(255,255,255,0.03)" strokeWidth="1" className="chart-grid-line" />
+
+                        <path d={fillPath} fill="url(#glowWave)" className="transition-all duration-500 ease-in-out" />
+                        <path d={linePath} fill="none" stroke="#7a60ff" strokeWidth="3.5" className="transition-all duration-500 ease-in-out" />
+
+                        <circle
+                          cx={activePoint[0]}
+                          cy={activePoint[1]}
+                          r="5"
+                          fill="#7a60ff"
+                          stroke="#ffffff"
+                          strokeWidth="2.5"
+                          className="animate-ping transition-all duration-300"
+                          style={{ transformOrigin: `${activePoint[0]}px ${activePoint[1]}px` }}
+                        />
+                        <circle
+                          cx={activePoint[0]}
+                          cy={activePoint[1]}
+                          r="5"
+                          fill="#7a60ff"
+                          stroke="#ffffff"
+                          strokeWidth="2.5"
+                          className="transition-all duration-300"
+                        />
+
+                        {points.map((p, idx) => (
+                          <rect
+                            key={idx}
+                            x={p[0] - 38}
+                            y="0"
+                            width="76"
+                            height="160"
+                            fill="transparent"
+                            className="cursor-pointer"
+                            onMouseEnter={() => setActiveDayIdx(idx)}
+                          />
+                        ))}
+                      </svg>
+                    </div>
+
+                    <div className="flex justify-between px-2 text-[10px] font-bold text-text-muted/80 uppercase tracking-widest">
+                      {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((key, idx) => (
+                        <span
+                          key={key}
+                          className={`cursor-pointer transition-all duration-200 ${activeDayIdx === idx
+                            ? 'text-color-accent-purple font-black scale-110'
+                            : 'hover:text-text-main'
+                            }`}
+                          onMouseEnter={() => setActiveDayIdx(idx)}
+                        >
+                          {t(key)}
+                        </span>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
+                {settings.showPerformanceTracking && (
+                  <Card className="flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-text-main tracking-wide">{tf('performanceTracking', 'Performance Tracking')}</h3>
+                        <p className="text-xs text-text-muted mt-0.5">{tf('performanceTrackingSub', 'Monitor artisan workloads and machinery utilization')}</p>
+                      </div>
+                      <div className="flex bg-bg-secondary p-1 rounded-xl border border-border-subtle">
+                        <button
+                          type="button"
+                          onClick={() => setPerfTab('Karigars')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            perfTab === 'Karigars' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
+                          }`}
+                        >
+                          {tf('karigars', 'Karigars')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPerfTab('Machines')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                            perfTab === 'Machines' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
+                          }`}
+                        >
+                          {tf('machines', 'Machines')}
+                        </button>
+                      </div>
+                    </div>
+
+                    {perfTab === 'Karigars' ? (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-border-subtle text-[10px] text-text-muted uppercase tracking-widest font-black">
+                              <th className="pb-3 text-left">{tf('artisanName', 'Artisan')}</th>
+                              <th className="pb-3 text-center">{tf('activeJobsCount', 'Active Workload')}</th>
+                              <th className="pb-3 text-right">{tf('earningsValue', 'Value Generated')}</th>
+                              <th className="pb-3 text-right">{tf('timelinessRate', 'On-Time Rate')}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border-subtle font-semibold">
+                            {!stats.karigarPerformance || stats.karigarPerformance.length === 0 ? (
+                              <tr>
+                                <td colSpan="4" className="py-6 text-center text-xs text-text-muted font-bold">
+                                  {tf('noArtisans', 'No artisan performance metrics found.')}
+                                </td>
+                              </tr>
+                            ) : (
+                              stats.karigarPerformance.map((k) => (
+                                <tr key={k._id} className="hover:bg-bg-hover/30 transition-colors">
+                                  <td className="py-3 text-sm font-semibold text-text-main">
+                                    <Link to={`/karigars/${k._id}`} className="text-color-accent-purple hover:underline font-bold">
+                                      {k.name}
+                                    </Link>
+                                    <span className="text-[9px] text-text-muted block font-extrabold mt-0.5 uppercase tracking-wide">
+                                      {k.specialization}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 text-center">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                                      k.activeCount > 3
+                                        ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                                        : k.activeCount > 0
+                                        ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                                        : 'bg-gray-500/10 text-gray-500 border border-gray-500/20'
+                                    }`}>
+                                      {k.activeCount} active
+                                    </span>
+                                  </td>
+                                  <td className="py-3 text-sm font-bold text-color-accent-emerald text-right">
+                                    {formatCurrency(k.completedValue)}
+                                  </td>
+                                  <td className="py-3 text-right">
+                                    <div className="flex flex-col items-end gap-1">
+                                      <span className="text-xs font-black text-text-main">{k.onTimeRate}%</span>
+                                      <div className="w-20 bg-bg-hover h-1.5 rounded-full overflow-hidden border border-border-subtle">
+                                        <div
+                                          style={{ width: `${k.onTimeRate}%` }}
+                                          className={`h-full rounded-full ${
+                                            k.onTimeRate >= 80 ? 'bg-emerald-500' : k.onTimeRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                                          }`}
+                                        />
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-border-subtle text-[10px] text-text-muted uppercase tracking-widest font-black">
+                              <th className="pb-3 text-left">{tf('machineNameNum', 'Machine')}</th>
+                              <th className="pb-3 text-center">{tf('status', 'Status')}</th>
+                              <th className="pb-3 text-center">{tf('activeJobs', 'Active Jobs')}</th>
+                              <th className="pb-3 text-right">{tf('totalUsage', 'Total Processed')}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border-subtle font-semibold">
+                            {!stats.machinePerformance || stats.machinePerformance.length === 0 ? (
+                              <tr>
+                                <td colSpan="4" className="py-6 text-center text-xs text-text-muted font-bold">
+                                  {tf('noMachines', 'No machine performance records found.')}
+                                </td>
+                              </tr>
+                            ) : (
+                              stats.machinePerformance.map((m) => (
+                                <tr key={m._id} className="hover:bg-bg-hover/30 transition-colors">
+                                  <td className="py-3 text-sm font-semibold text-text-main flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-bg-hover flex items-center justify-center text-color-accent-purple shrink-0">
+                                      <GiSewingMachine className="w-5 h-5 text-color-accent-purple" />
+                                    </div>
+                                    <div>
+                                      <span className="font-bold block text-text-main leading-tight">{m.name}</span>
+                                      <span className="text-[9px] text-text-muted font-extrabold uppercase tracking-wider">{m.type}</span>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 text-center">
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                                      m.status === 'Working'
+                                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                        : m.status === 'Maintenance'
+                                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                        : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                                    }`}>
+                                      {m.status}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 text-center text-xs font-bold text-text-main">
+                                    {m.activeCount}
+                                  </td>
+                                  <td className="py-3 text-sm font-black text-text-main text-right">
+                                    {m.totalCount} jobs
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </Card>
+                )}
+              </div>
+            )}
+
+            {showRightCol && (
+              <div className={`${showLeftCol && showRightCol ? 'lg:col-span-1' : 'w-full'} flex flex-col gap-6 text-left`}>
+                {settings.showCalendar && (
+                  <Card className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                      <div className="flex items-center gap-1">
+                        <button onClick={handlePrevMonth} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
+                          <MdChevronLeft className="w-4 h-4" />
+                        </button>
+                        <span className="text-sm font-bold text-text-main tracking-wide w-[72px] text-center">{t(calendarMonth.toLowerCase())}</span>
+                        <button onClick={handleNextMonth} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
+                          <MdChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={handlePrevYear} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
+                          <MdChevronLeft className="w-4 h-4" />
+                        </button>
+                        <span className="text-sm font-bold text-text-main tracking-wide w-12 text-center">{calendarYear}</span>
+                        <button onClick={handleNextYear} className="p-1.5 rounded-lg hover:bg-bg-hover text-text-muted hover:text-text-main cursor-pointer transition-colors">
+                          <MdChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {(selectedRange.start || selectedRange.end) && (
+                      <div className="flex items-center justify-between text-[10px] font-bold px-1">
+                        <span className="text-color-accent-blue uppercase tracking-wider">
+                          {selectedRange.start && !selectedRange.end
+                            ? t('calendarClickEnd')
+                            : `${selectedRange.start} – ${selectedRange.end} ${t(calendarMonth.toLowerCase())}`}
+                        </span>
+                        <button
+                          onClick={() => setSelectedRange({ start: null, end: null })}
+                          className="text-text-muted hover:text-text-main cursor-pointer"
+                        >
+                          <MdClose className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-7 text-center text-[10px] font-extrabold text-text-muted uppercase tracking-widest">
+                      {['sun_short', 'mon_short', 'tue_short', 'wed_short', 'thu_short', 'fri_short', 'sat_short'].map((key, i) => (
+                        <span key={i} className={i === 0 || i === 6 ? 'text-color-accent-pink/70' : ''}>{t(key)}</span>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-y-2 text-center text-xs font-bold mt-2">
+                      {[...Array(firstDayOffset)].map((_, i) => (
+                        <div key={`e${i}`} />
+                      ))}
+
+                      {[...Array(daysInMonth)].map((_, i) => {
+                        const day = i + 1;
+                        const isStart = selectedRange.start === day;
+                        const isEnd = selectedRange.end === day;
+                        const isPending = selectedRange.start && !selectedRange.end && day === selectedRange.start;
+                        const isToday = isCurrentMonthYear && day === todayDay;
+                        const inRange = selectedRange.start && selectedRange.end
+                          && day >= selectedRange.start && day <= selectedRange.end;
+
+                        const col = (firstDayOffset + day - 1) % 7;
+                        let containerClass = 'relative w-full h-8 flex items-center justify-center cursor-pointer';
+
+                        let stripClass = '';
+                        let hasUpBridge = false;
+                        let hasStartOutfill = false;
+                        let hasEndOutfill = false;
+                        if (selectedRange.start && selectedRange.end && selectedRange.start !== selectedRange.end) {
+                          if (inRange) {
+                            stripClass = 'absolute inset-0 bg-[var(--calendar-range-bg)] z-0';
+                            const hasUp = day - 7 >= selectedRange.start;
+                            const hasDown = day + 7 <= selectedRange.end;
+                            const hasLeft = col > 0 && day - 1 >= selectedRange.start;
+                            const hasRight = col < 6 && day + 1 <= selectedRange.end;
+
+                            if (!hasUp && !hasLeft) stripClass += ' rounded-tl-[14px]';
+                            if (!hasUp && !hasRight) stripClass += ' rounded-tr-[14px]';
+                            if (!hasDown && !hasLeft) stripClass += ' rounded-bl-[14px]';
+                            if (!hasDown && !hasRight) stripClass += ' rounded-br-[14px]';
+
+                            if (hasUp) hasUpBridge = true;
+                            if (isStart && hasDown && col > 0) hasStartOutfill = true;
+                            if (isEnd && hasUp && col < 6) hasEndOutfill = true;
+                          }
+                        }
+
+                        let circleClass = 'w-8 h-8 flex items-center justify-center rounded-full transition-all duration-150 text-xs z-10 relative';
+
+                        if (isStart || isEnd) {
+                          circleClass += ' bg-[#007aff] text-white-forced font-black shadow-lg shadow-[#007aff]/40 scale-105';
+                        } else if (isPending) {
+                          circleClass += ' bg-[#007aff]/30 text-white-forced font-extrabold ring-2 ring-[#007aff]/50 ring-offset-2 ring-offset-[var(--bg-primary)]';
+                        } else if (isToday) {
+                          circleClass += ' ring-2 ring-[#7a60ff]/60 text-[#7a60ff] font-extrabold';
+                        } else if (inRange) {
+                          circleClass += ' calendar-inrange-text font-bold';
+                        } else {
+                          circleClass += ' text-text-muted hover:bg-bg-hover hover:text-text-main';
+                        }
+
+                        return (
+                          <div key={day} className={containerClass} onClick={() => handleDayClick(day)}>
+                            {stripClass && <div className={stripClass} />}
+                            {hasUpBridge && (
+                              <div className="absolute bottom-full left-0 w-full h-2 bg-[var(--calendar-range-bg)] z-0" />
+                            )}
+                            {hasStartOutfill && (
+                              <div
+                                className="absolute top-full right-full w-4 h-4 z-0 pointer-events-none"
+                                style={{ background: 'radial-gradient(circle at top left, transparent 16px, var(--calendar-range-color) 16.5px)' }}
+                              />
+                            )}
+                            {hasEndOutfill && (
+                              <div
+                                className="absolute bottom-full left-full w-4 h-4 z-0 pointer-events-none"
+                                style={{ background: 'radial-gradient(circle at bottom right, transparent 16px, var(--calendar-range-color) 16.5px)' }}
+                              />
+                            )}
+                            <span className={circleClass}>{day}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-1 border-t border-border-subtle pt-3">
+                      <button
+                        onClick={() => setSelectedRange({ start: null, end: null })}
+                        className="flex-1 py-2 rounded-xl bg-bg-hover hover:bg-border-medium text-xs text-text-main font-bold active:scale-95 transition-all cursor-pointer border border-border-subtle"
+                      >
+                        {t('calendarClear')}
+                      </button>
+                      <button
+                        disabled={!selectedRange.start || !selectedRange.end}
+                        className="flex-1 py-2 rounded-xl bg-color-accent-blue text-xs text-white-forced font-bold hover:bg-color-accent-blue/90 active:scale-95 transition-all shadow-md shadow-color-accent-blue/20 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {selectedRange.start && selectedRange.end
+                          ? `${filteredOrders.length} ${t('ordersFound')}`
+                          : t('calendarApplyRange')}
+                      </button>
+                    </div>
+                  </Card>
+                )}
+
+                {settings.showReminders && (
+                  <Card className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                      <div>
+                        <h3 className="text-base font-bold text-text-main tracking-wide">{t('todayReminders')}</h3>
+                        <p className="text-xs text-text-muted mt-0.5">{t('todayRemindersSub')}</p>
+                      </div>
+                      <MdNotificationsActive className="w-5 h-5 text-color-accent-pink animate-pulse" />
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {stats.reminders.length === 0 ? (
+                        <div className="text-xs text-text-muted text-center py-6">
+                          {t('noReminders')}
+                        </div>
+                      ) : (
+                        stats.reminders.map((alert) => (
+                          <div
+                            key={alert._id}
+                            className="p-3 bg-bg-secondary border border-border-subtle rounded-xl flex items-start gap-3 hover:border-border-medium transition-colors"
+                          >
+                            <div className="w-1.5 h-1.5 rounded-full bg-color-accent-pink shrink-0 mt-1.5" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-text-main font-semibold leading-relaxed text-left">
+                                {alert.message}
+                              </p>
+                              <span className="text-[9px] text-text-muted font-bold block mt-1 uppercase tracking-wider">
+                                {formatDate(alert.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <Link
+                      to="/notifications"
+                      className="mt-2 text-xs font-bold text-color-accent-purple hover:underline flex items-center justify-center gap-1"
+                    >
+                      <span>{t('viewFeed')}</span>
+                      <MdArrowForward className="w-3.5 h-3.5" />
+                    </Link>
+                  </Card>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* FAB actions (Step 1 routes are not active, will hit 404) */}
       <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3">

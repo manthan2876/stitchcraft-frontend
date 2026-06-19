@@ -76,14 +76,27 @@ export const Profile = () => {
   // Load Settings from LocalStorage
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('stitchcraft_settings');
-    return saved ? JSON.parse(saved) : {
+    const defaultSettings = {
       emailNotifications: true,
       smsNotifications: false,
       darkMode: true,
       language: 'English',
       currency: 'INR (₹)',
       dateFormat: 'DD/MM/YYYY',
+      showStatsCards: true,
+      showRecentOrders: true,
+      showWeeklyStitching: true,
+      showPerformanceTracking: true,
+      showCalendar: true,
+      showReminders: true,
     };
+    if (!saved) return defaultSettings;
+    try {
+      const parsed = JSON.parse(saved);
+      return { ...defaultSettings, ...parsed };
+    } catch (e) {
+      return defaultSettings;
+    }
   });
 
   const { theme, toggleTheme } = useTheme();
@@ -518,6 +531,41 @@ export const Profile = () => {
                     }`}
                 >
                   <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${(s.key === 'darkMode' ? theme === 'dark' : settings[s.key]) ? 'left-[calc(100%-18px)]' : 'left-0.5'
+                    }`} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <MdNotifications className="w-3.5 h-3.5" /> {t('dashboardCustomization')}
+            </p>
+            <p className="text-xs text-text-muted -mt-1 mb-1 font-semibold">{t('dashboardCustomizationDesc')}</p>
+            {[
+              { key: 'showStatsCards', label: t('showStatsCards'), desc: t('showStatsCardsDesc') },
+              { key: 'showRecentOrders', label: t('showRecentOrders'), desc: t('showRecentOrdersDesc') },
+              { key: 'showWeeklyStitching', label: t('showWeeklyStitching'), desc: t('showWeeklyStitchingDesc') },
+              { key: 'showPerformanceTracking', label: t('showPerformanceTracking'), desc: t('showPerformanceTrackingDesc') },
+              { key: 'showCalendar', label: t('showCalendar'), desc: t('showCalendarDesc') },
+              { key: 'showReminders', label: t('showReminders'), desc: t('showRemindersDesc') },
+            ].map(s => (
+              <div key={s.key} className="flex items-center justify-between bg-bg-secondary border border-border-subtle rounded-xl px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-text-main">{s.label}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{s.desc}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSettings(prev => ({ ...prev, [s.key]: !prev[s.key] }));
+                  }}
+                  className={`w-11 h-6 rounded-full border-2 transition-all cursor-pointer relative ${settings[s.key]
+                    ? 'bg-color-accent-purple border-color-accent-purple'
+                    : 'bg-bg-hover border-border-medium'
+                    }`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${settings[s.key] ? 'left-[calc(100%-18px)]' : 'left-0.5'
                     }`} />
                 </button>
               </div>
