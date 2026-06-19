@@ -11,6 +11,7 @@ export const Orders = () => {
   const { t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [inventories, setInventories] = useState([]);
 
   // Deletion modal state
   const [deleteTargetOrder, setDeleteTargetOrder] = useState(null);
@@ -36,6 +37,23 @@ export const Orders = () => {
   };
 
   useEffect(() => { fetchOrders(); }, []);
+
+  useEffect(() => {
+    const fetchInventories = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('/inventory?itemType=accessories');
+        const data = response.data || response;
+        setInventories(data);
+      } catch (err) {
+        console.error('Failed to fetch Inventories:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchInventories();
+  }, []);
+
 
   const handleOpenDeleteModal = (order) => {
     setDeleteTargetOrder(order);
@@ -98,7 +116,6 @@ export const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
-  console.log(inventories);
   return (
     <div className="flex flex-col gap-6 select-none text-left">
       {/* Page Header */}
@@ -207,7 +224,11 @@ export const Orders = () => {
                       {order.needsAster ? (
                         <div className="flex flex-col gap-1">
                           <span style={{ whiteSpace: 'nowrap' }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 inline-flex items-center gap-1">
-                            {t('yesVal')}{order.asterQuantity > 0 ? ` · ${order.asterQuantity}` : ''}{inventories.unit ? ` · ${inventories.unit}` : ''}
+                            {t('yesVal')}
+                            {order.asterQuantity > 0
+                              ? ` · ${order.asterQuantity} ${order.asterInventoryItem?.unit || ''}`
+                              : ''
+                            }
                           </span>
                           {order.asterDeducted && (
                             <span style={{ whiteSpace: 'nowrap' }} className="text-[9px] text-color-accent-emerald font-extrabold flex items-center gap-0.5">✓ Stock deducted</span>
