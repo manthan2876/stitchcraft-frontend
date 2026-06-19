@@ -21,6 +21,7 @@ export const InvoiceDetails = () => {
   const { t } = useLanguage();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shop, setShop] = useState(null);
 
   const tf = (key, fallback) => {
     const val = t(key);
@@ -28,29 +29,34 @@ export const InvoiceDetails = () => {
   };
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
+    const fetchAllData = async () => {
       try {
         const data = await api.get(`/orders/${id}`);
         setOrder(data);
+
+        if (data && data.shopId) {
+          const shopData = await api.get(`/shops/${data.shopId}`);
+          setShop(shopData);
+        }
       } catch (err) {
         console.error('Failed to load invoice details:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchOrderDetails();
+    fetchAllData();
   }, [id]);
 
   if (loading) {
-    return <div className="w-full py-12 text-center text-sm text-text-muted">{tf('syncing', 'Syncing...')}</div>;
+    return <div className="w-full py-12 text-center text-sm text-text-muted">{t('syncing')}</div>;
   }
 
   if (!order) {
     return (
       <Card className="flex flex-col items-center justify-center py-12 text-center gap-4">
-        <h4 className="text-sm font-bold text-text-main">{tf('invoiceNotFound', 'Invoice Not Found')}</h4>
-        <button onClick={() => navigate('/invoices')} className="btn-tactile cursor-pointer">
-          <span className="text-white-forced">{tf('backToInvoices', 'Back to Invoices')}</span>
+        <h4 className="text-sm font-bold text-text-main">{t('invoiceNotFound')}</h4>
+        <button onClick={() => navigate('/orders')} className="btn-tactile cursor-pointer">
+          <span className="text-white-forced">{t('backToInvoices')}</span>
         </button>
       </Card>
     );
@@ -91,35 +97,56 @@ export const InvoiceDetails = () => {
     return `${window.location.origin}/invoice/share/${order._id}`;
   };
 
+  // Add this helper function inside the InvoiceDetails component
+  const formatMessage = (template, data) => {
+    let msg = template;
+    Object.keys(data).forEach(key => {
+      // Replaces {key} with the corresponding value from data object
+      msg = msg.replace(new RegExp(`{${key}}`, 'g'), data[key]);
+    });
+    return msg;
+  };
+
   const handleShareInvoice = () => {
-    const customerName = order.customerName;
     const phone = getWhatsAppNumber();
     const guestUrl = getGuestInvoiceUrl();
     const invoiceId = `INV-${order.orderId}`;
-    
-    const message = `Hello ${customerName}, here is the invoice ${invoiceId} for your tailoring order at StitchCraft.\n\n` +
-      `Tailoring Details: ${order.apparelType} Stitching\n` +
-      `Total Invoice Amount: ₹${billTotal.toFixed(2)}\n` +
-      `Amount Paid: ₹${paidAmount.toFixed(2)}\n` +
-      `Outstanding Balance: ₹${balanceDue.toFixed(2)}\n\n` +
-      `You can view your detailed bill online here: ${guestUrl}\n\n` +
-      `Thank you for choosing StitchCraft!`;
-      
+
+    // 1. Get the raw template string from your translations
+    const template = t('whatsappInvoiceMsg');
+
+    // 2. Format the template with the data object
+    const message = formatMessage(template, {
+      name: order.customerName,
+      id: invoiceId,
+      shopName: shop?.shopName || 'StitchCraft',
+      total: billTotal.toFixed(2),
+      paid: paidAmount.toFixed(2),
+      balance: balanceDue.toFixed(2),
+      url: guestUrl
+    });
+
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleSendReminder = () => {
-    const customerName = order.customerName;
     const phone = getWhatsAppNumber();
     const guestUrl = getGuestInvoiceUrl();
     const invoiceId = `INV-${order.orderId}`;
-    
-    const message = `Dear ${customerName}, this is a friendly reminder that an outstanding payment of ₹${balanceDue.toFixed(2)} is due for invoice ${invoiceId} at StitchCraft.\n\n` +
-      `Please clear this balance at your earliest convenience.\n` +
-      `You can view your detailed receipt here: ${guestUrl}\n\n` +
-      `Thank you, StitchCraft Tailors.`;
-      
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+
+    // 1. Get the raw template string
+    const template = t('whatsappReminderMsg');
+
+    // 2. Format the template
+    const message = formatMessage(template, {
+      name: order.customerName,
+      balance: balanceDue.toFixed(2),
+      id: invoiceId,
+      shopName: shop?.shopName || 'StitchCraft',
+      url: guestUrl
+    });
+
+    window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handlePrint = () => {
@@ -128,7 +155,8 @@ export const InvoiceDetails = () => {
 
   return (
     <div className="flex flex-col gap-6 select-none max-w-4xl mx-auto text-left pb-24">
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           /* Hide sidebar, topbar, buttons, back links, and other non-print elements */
           .print-hidden-element, button, a {
@@ -214,18 +242,18 @@ export const InvoiceDetails = () => {
               <InvoiceIcon className="w-7 h-7 text-white-forced" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-text-main tracking-wider">StitchCraft</h1>
-              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-0.5">Premium Tailoring ERP</p>
+              <h1 className="text-2xl font-black text-text-main tracking-wider">{t('title')}</h1>
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-0.5">{t('erpdescription')}</p>
             </div>
           </div>
 
           <div className="text-left sm:text-right">
-            <h2 className="text-lg font-black text-color-accent-purple tracking-wide">INVOICE</h2>
+            <h2 className="text-lg font-black text-color-accent-purple tracking-wide">{t('invoiceTitle')}</h2>
             <div className="flex flex-col gap-0.5 mt-1.5 text-xs text-text-muted font-bold">
-              <span>Invoice ID: <strong className="text-text-main font-black">{`INV-${order.orderId}`}</strong></span>
-              <span>Order Ref: <strong className="text-text-main">{order.orderId}</strong></span>
-              <span>Billing Date: <strong>{formatDate(order.date)}</strong></span>
-              <span>Due Date: <strong>{formatDate(order.deliveryDate)}</strong></span>
+              <span>{t('invoiceid')}: <strong className="text-text-main font-black">{`INV-${order.orderId}`}</strong></span>
+              <span>{t('orderRef')}: <strong className="text-text-main">{order.orderId}</strong></span>
+              <span>{t('billingDate')}: <strong>{formatDate(order.date)}</strong></span>
+              <span>{t('dueDate')}: <strong>{formatDate(order.deliveryDate)}</strong></span>
             </div>
           </div>
         </div>
@@ -233,44 +261,44 @@ export const InvoiceDetails = () => {
         {/* Customer & Merchant Profiles */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-b border-border-subtle pb-6 text-xs text-text-muted">
           <div className="flex flex-col gap-2">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">Billed To</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">{t('billedTo')}</span>
             <div className="flex flex-col gap-1 text-sm font-semibold text-text-main">
               <span className="font-extrabold text-base text-color-accent-purple">{order.customerName}</span>
-              <span>Phone: {order.customer?.phone || 'No phone recorded'}</span>
+              <span>{t('phone')}: {order.customer?.phone || 'No phone recorded'}</span>
               {order.customer?.address && <span className="opacity-80 font-normal leading-relaxed">{order.customer.address}</span>}
             </div>
           </div>
 
           <div className="flex flex-col gap-2 sm:items-end sm:text-right">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">Merchant Details</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">{t('merchantDetails')}</span>
             <div className="flex flex-col gap-1 text-sm font-semibold text-text-main">
-              <span className="font-extrabold text-base text-text-main">StitchCraft Tailors</span>
-              <span>102 Main Street, Central Plaza</span>
-              <span>Phone: +91 98765 43210</span>
-              <span className="opacity-80">support@stitchcraft.com</span>
+              <span className="font-extrabold text-base text-text-main">{shop.shopName}</span>
+              <span>{t('address')}: {shop.address}</span>
+              <span>{t('phone')}: {shop.phone}</span>
+              <span className="opacity-80">{t('email')}: {shop.email}</span>
             </div>
           </div>
         </div>
 
         {/* Line Items Table */}
         <div className="flex flex-col gap-3">
-          <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">Invoice Line Items</span>
+          <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">{t('invoiceLineItems')}</span>
           <div className="overflow-hidden border border-border-subtle rounded-xl bg-bg-primary/20">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="bg-bg-secondary border-b border-border-subtle text-[10px] font-extrabold text-text-muted uppercase tracking-wider">
-                  <th className="px-4 py-3">Item Description</th>
-                  <th className="px-4 py-3 text-center">Quantity</th>
-                  <th className="px-4 py-3 text-right">Unit Price</th>
-                  <th className="px-4 py-3 text-right">Amount</th>
+                  <th className="px-4 py-3">{t('itemDesc')}</th>
+                  <th className="px-4 py-3 text-center">{t('quantity')}</th>
+                  <th className="px-4 py-3 text-right">{t('unitPrice')}</th>
+                  <th className="px-4 py-3 text-right">{t('amount')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle font-semibold text-text-main">
                 {/* Stitching Service Item */}
                 <tr>
                   <td className="px-4 py-4.5">
-                    <span className="font-bold block text-sm">{order.apparelType} Stitching Service</span>
-                    <span className="text-[10px] text-text-muted font-normal mt-0.5 block">Custom tailoring stitching service package</span>
+                    <span className="font-bold block text-sm">{order.apparelType} {t('stitchingService')}</span>
+                    <span className="text-[10px] text-text-muted font-normal mt-0.5 block">{t('stitchingServiceDesc')}</span>
                   </td>
                   <td className="px-4 py-4.5 text-center">1</td>
                   <td className="px-4 py-4.5 text-right">{formatCurrency(order.price)}</td>
@@ -281,8 +309,8 @@ export const InvoiceDetails = () => {
                 {order.needsAster && (
                   <tr>
                     <td className="px-4 py-4.5">
-                      <span className="font-bold block text-sm">Lining / Astar Material: {order.asterInventoryItem?.itemName || 'Lining Material'}</span>
-                      <span className="text-[10px] text-text-muted font-normal mt-0.5 block">Material used for inner garment lining support</span>
+                      <span className="font-bold block text-sm">{t('liningMaterial')}: {order.asterInventoryItem?.itemName || 'Lining Material'}</span>
+                      <span className="text-[10px] text-text-muted font-normal mt-0.5 block">{t('liningMaterialDesc')}</span>
                     </td>
                     <td className="px-4 py-4.5 text-center">{order.asterQuantity} {order.asterInventoryItem?.unit || 'meters'}</td>
                     <td className="px-4 py-4.5 text-right">{formatCurrency(order.asterSellingPrice)}</td>
@@ -297,37 +325,35 @@ export const InvoiceDetails = () => {
         {/* Financial Summary */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pt-4">
           <div className="flex flex-col gap-2">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">Invoice Status</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-text-muted/60">{t('invoiceStatus')}</span>
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider ${getStatusBadgeClass(billingStatus)}`}>
-                {billingStatus}
+                {tf(billingStatus.toLowerCase(), billingStatus)}
               </span>
               {billingStatus === 'Paid' && <CheckIcon className="w-5 h-5 text-emerald-500" />}
             </div>
-            <p className="text-[10px] text-text-muted max-w-xs mt-1 leading-relaxed">
-              This invoice is generated dynamically from tailor order details. All payments recorded automatically in the general ledger database.
-            </p>
+            <p className="text-[10px] text-text-muted max-w-xs mt-1 leading-relaxed">{t('invoiceDes')}</p>
           </div>
 
           <div className="w-full sm:w-[280px] flex flex-col gap-3 text-xs text-text-muted">
             <div className="flex justify-between font-bold">
-              <span>Subtotal</span>
+              <span>{t('subtotal')}</span>
               <span className="text-text-main font-semibold">{formatCurrency(billTotal)}</span>
             </div>
             <div className="flex justify-between font-bold">
-              <span>Sales Tax (0%)</span>
+              <span>{t('salesTax')} (0%)</span>
               <span className="text-text-main font-semibold">{formatCurrency(0)}</span>
             </div>
             <div className="flex justify-between border-t border-border-subtle pt-2.5 font-bold">
-              <span>Total Bill</span>
+              <span>{t('totalBill')}</span>
               <span className="text-text-main font-semibold">{formatCurrency(billTotal)}</span>
             </div>
             <div className="flex justify-between font-bold">
-              <span>Total Paid</span>
+              <span>{t('totalPaid')}</span>
               <span className="text-emerald-500 font-bold">{formatCurrency(paidAmount)}</span>
             </div>
             <div className="flex justify-between border-t border-border-strong border-double pt-2.5 text-sm font-black">
-              <span className="text-text-main uppercase tracking-wider">Balance Due</span>
+              <span className="text-text-main uppercase tracking-wider">{t('balanceDue')}</span>
               <span className="text-rose-500">{formatCurrency(balanceDue)}</span>
             </div>
           </div>

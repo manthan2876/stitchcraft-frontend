@@ -9,6 +9,11 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
+  const tf = (key, fallback) => {
+    const val = t(key);
+    return val === key ? fallback : val;
+  };
+
   const statusList = ['Incoming', 'Measuring', 'Cutting', 'Stitching', 'Checking', 'Ready', 'Delivered', 'Cancelled'];
 
   const filteredOrders = orders.filter(o => {
@@ -117,7 +122,7 @@ export const RecentOrders = ({ orders, onUpdateStatus, onEditOrder }) => {
                       {order.customerName}
                     </td>
                     <td className="px-6 py-4 text-sm text-text-muted">
-                      {order.apparelType}
+                      {tf(order.apparelType.toLowerCase(), order.apparelType)}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main">
                       {formatDate(order.deliveryDate)}

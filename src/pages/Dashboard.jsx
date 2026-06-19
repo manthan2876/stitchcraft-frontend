@@ -375,18 +375,16 @@ export const Dashboard = () => {
                         <button
                           type="button"
                           onClick={() => setPerfTab('Karigars')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            perfTab === 'Karigars' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
-                          }`}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${perfTab === 'Karigars' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
+                            }`}
                         >
                           {tf('karigars', 'Karigars')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setPerfTab('Machines')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                            perfTab === 'Machines' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
-                          }`}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${perfTab === 'Machines' ? 'bg-color-accent-purple text-white-forced shadow-md' : 'text-text-muted hover:text-text-main'
+                            }`}
                         >
                           {tf('machines', 'Machines')}
                         </button>
@@ -419,18 +417,17 @@ export const Dashboard = () => {
                                       {k.name}
                                     </Link>
                                     <span className="text-[9px] text-text-muted block font-extrabold mt-0.5 uppercase tracking-wide">
-                                      {k.specialization}
+                                      {tf(k.specialization.toLowerCase(), k.specialization)}
                                     </span>
                                   </td>
                                   <td className="py-3 text-center">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                                      k.activeCount > 3
-                                        ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                                        : k.activeCount > 0
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black ${k.activeCount > 3
+                                      ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                                      : k.activeCount > 0
                                         ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
                                         : 'bg-gray-500/10 text-gray-500 border border-gray-500/20'
-                                    }`}>
-                                      {k.activeCount} active
+                                      }`}>
+                                      {k.activeCount} {t('active')}
                                     </span>
                                   </td>
                                   <td className="py-3 text-sm font-bold text-color-accent-emerald text-right">
@@ -442,9 +439,8 @@ export const Dashboard = () => {
                                       <div className="w-20 bg-bg-hover h-1.5 rounded-full overflow-hidden border border-border-subtle">
                                         <div
                                           style={{ width: `${k.onTimeRate}%` }}
-                                          className={`h-full rounded-full ${
-                                            k.onTimeRate >= 80 ? 'bg-emerald-500' : k.onTimeRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                                          }`}
+                                          className={`h-full rounded-full ${k.onTimeRate >= 80 ? 'bg-emerald-500' : k.onTimeRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                                            }`}
                                         />
                                       </div>
                                     </div>
@@ -482,25 +478,24 @@ export const Dashboard = () => {
                                     </div>
                                     <div>
                                       <span className="font-bold block text-text-main leading-tight">{m.name}</span>
-                                      <span className="text-[9px] text-text-muted font-extrabold uppercase tracking-wider">{m.type}</span>
+                                      <span className="text-[9px] text-text-muted font-extrabold uppercase tracking-wider">{tf(m.type.toLowerCase(), m.type)}</span>
                                     </div>
                                   </td>
                                   <td className="py-3 text-center">
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                                      m.status === 'Working'
-                                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                                        : m.status === 'Maintenance'
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${m.status === 'Working'
+                                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                      : m.status === 'Maintenance'
                                         ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
                                         : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
-                                    }`}>
-                                      {m.status}
+                                      }`}>
+                                      {tf(m.status.toLowerCase(), m.status)}
                                     </span>
                                   </td>
                                   <td className="py-3 text-center text-xs font-bold text-text-main">
                                     {m.activeCount}
                                   </td>
                                   <td className="py-3 text-sm font-black text-text-main text-right">
-                                    {m.totalCount} jobs
+                                    {m.totalCount} {t('jobs')}
                                   </td>
                                 </tr>
                               ))

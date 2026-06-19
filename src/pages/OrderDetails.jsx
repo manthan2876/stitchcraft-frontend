@@ -222,10 +222,10 @@ export const OrderDetails = () => {
 
       {/* Three Column Info Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Left Column: Order details & fabrication */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          
+
           {/* Order Specifications Card */}
           <Card className="flex flex-col gap-5">
             <h3 className="text-sm font-black text-text-main uppercase tracking-wider border-b border-border-subtle pb-3">
@@ -448,18 +448,17 @@ export const OrderDetails = () => {
 
         {/* Right Column: Payments & Deliveries */}
         <div className="flex flex-col gap-6">
-          
+
           {/* Payment Card */}
           <Card className="flex flex-col gap-5 border-l-4 border-l-emerald-500">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <h3 className="text-sm font-black text-text-main uppercase tracking-wider">
                 💰 {tf('billingOverview', 'Billing Overview')}
               </h3>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                isFullyPaid
+              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${isFullyPaid
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                   : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-              }`}>
+                }`}>
                 {isFullyPaid ? tf('fullyPaid', 'Fully Paid') : tf('pendingBalance', 'Pending Balance')}
               </span>
             </div>
@@ -521,12 +520,11 @@ export const OrderDetails = () => {
               <h3 className="text-sm font-black text-text-main uppercase tracking-wider">
                 📦 {tf('deliveryStatus', 'Delivery Tracking')}
               </h3>
-              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
-                order.delivery?.status === 'Delivered'
+              <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${order.delivery?.status === 'Delivered'
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                   : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-              }`}>
-                {order.delivery?.status === 'Delivered' ? tf('statusDelivered', 'Delivered') : tf('statusPending', 'Pending')}
+                }`}>
+                {order.delivery?.status === 'Delivered' ? tf('delivered', 'Delivered') : tf('statusPending', 'Pending')}
               </span>
             </div>
 
@@ -562,7 +560,7 @@ export const OrderDetails = () => {
 
             <div className="flex flex-col gap-3">
               <h4 className="text-sm font-bold text-text-main leading-snug">{order.customerName}</h4>
-              
+
               <div className="flex flex-col gap-2.5 text-xs text-text-muted font-semibold">
                 <span className="flex items-center gap-2">
                   <MdPhone className="w-4 h-4 text-color-accent-purple" /> {order.customer?.phone || 'No phone recorded'}
@@ -579,7 +577,7 @@ export const OrderDetails = () => {
                     <FaWhatsapp className="w-3.5 h-3.5" />
                   </button>
                 </span>
-                
+
                 {order.customer?.address && (
                   <div className="border-t border-border-subtle pt-2.5 mt-0.5">
                     <span className="text-[10px] uppercase font-bold tracking-wider block mb-1 text-text-muted/65">{t('address')}</span>

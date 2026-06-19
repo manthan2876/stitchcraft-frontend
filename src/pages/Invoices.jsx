@@ -42,7 +42,7 @@ export const Invoices = () => {
     const billTotal = order.price + liningTotal;
     const paidAmount = order.payment?.paidAmount || 0;
     const balanceAmount = Math.max(0, billTotal - paidAmount);
-    
+
     let billingStatus = 'Unpaid';
     if (paidAmount > 0) {
       billingStatus = balanceAmount === 0 ? 'Paid' : 'Partial';

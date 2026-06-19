@@ -98,6 +98,7 @@ export const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
+  console.log(inventories);
   return (
     <div className="flex flex-col gap-6 select-none text-left">
       {/* Page Header */}
@@ -141,7 +142,7 @@ export const Orders = () => {
                   ? 'bg-color-accent-purple border border-color-accent-purple text-white-forced shadow-md shadow-color-accent-purple/20'
                   : 'filter-tab-inactive hover:text-text-main'}`}
             >
-              {status === 'All' ? tf('all', 'All') : tf('status' + status, status)}
+              {tf(status.toLowerCase(), status)}
             </button>
           ))}
         </div>
@@ -156,7 +157,7 @@ export const Orders = () => {
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('orderId', 'Order ID')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('customer', 'Customer')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('apparel', 'Apparel')}</th>
-                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Maap / Meas.</th>
+                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('maap', 'Maap/ Meas.')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('lining', 'Lining / Astar')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('karigar', 'Karigar')}</th>
                 <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">{tf('dateCreated', 'Date Created')}</th>
@@ -188,16 +189,16 @@ export const Orders = () => {
                       </Link>
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-text-main/90">{order.customerName}</td>
-                    <td className="px-6 py-4 text-sm font-bold text-text-muted">{order.apparelType ? tf('apparel' + order.apparelType, order.apparelType) : '—'}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-text-muted">{order.apparelType ? tf(order.apparelType.toLowerCase(), order.apparelType) : '—'}</td>
                     {/* Measurement type badge */}
                     <td className="px-6 py-4 text-xs font-bold">
                       {order.measurementType === 'Maap' ? (
                         <span style={{ whiteSpace: 'nowrap' }} className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-purple/10 text-color-accent-purple border border-color-accent-purple/20">
-                          🧵 Maap
+                          🧵 {tf('maap', 'Maap')}
                         </span>
                       ) : (
                         <span style={{ whiteSpace: 'nowrap' }} className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/20">
-                          📏 Meas.
+                          📏 {tf('maap', 'Measurement')}
                         </span>
                       )}
                     </td>
@@ -206,7 +207,7 @@ export const Orders = () => {
                       {order.needsAster ? (
                         <div className="flex flex-col gap-1">
                           <span style={{ whiteSpace: 'nowrap' }} className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-color-accent-pink/10 text-color-accent-pink border border-color-accent-pink/20 inline-flex items-center gap-1">
-                            Yes{order.asterQuantity > 0 ? ` · ${order.asterQuantity}` : ''}
+                            {t('yesVal')}{order.asterQuantity > 0 ? ` · ${order.asterQuantity}` : ''}{inventories.unit ? ` · ${inventories.unit}` : ''}
                           </span>
                           {order.asterDeducted && (
                             <span style={{ whiteSpace: 'nowrap' }} className="text-[9px] text-color-accent-emerald font-extrabold flex items-center gap-0.5">✓ Stock deducted</span>

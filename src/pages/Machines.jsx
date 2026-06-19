@@ -267,11 +267,11 @@ export const Machines = () => {
                     onChange={e => setForm({ ...form, type: e.target.value })}
                     className="w-full px-4 py-2.5 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple text-sm transition-all cursor-pointer font-bold"
                   >
-                    <option value="Sewing" className="bg-bg-card">{tf('machineSewing', 'Sewing')}</option>
-                    <option value="Overlock" className="bg-bg-card">{tf('machineOverlock', 'Overlock')}</option>
-                    <option value="Embroidery" className="bg-bg-card">{tf('machineEmbroidery', 'Embroidery')}</option>
-                    <option value="Buttonhole" className="bg-bg-card">{tf('machineButtonhole', 'Buttonhole')}</option>
-                    <option value="Ironing" className="bg-bg-card">{tf('machineIroning', 'Ironing')}</option>
+                    <option value="Sewing" className="bg-bg-card">{tf('sewing', 'Sewing')}</option>
+                    <option value="Overlock" className="bg-bg-card">{tf('overlock', 'Overlock')}</option>
+                    <option value="Embroidery" className="bg-bg-card">{tf('embroidery', 'Embroidery')}</option>
+                    <option value="Buttonhole" className="bg-bg-card">{tf('buttonhole', 'Buttonhole')}</option>
+                    <option value="Ironing" className="bg-bg-card">{tf('ironing', 'Ironing')}</option>
                   </select>
                 </div>
 

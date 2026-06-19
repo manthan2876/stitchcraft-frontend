@@ -241,12 +241,12 @@ export const NewOrder = () => {
                 <label className="text-sm font-medium text-text-muted">{tf('apparelCategory', 'Apparel Category')}</label>
                 <select value={apparelType} onChange={handleApparelTypeChange}
                   className="w-full px-4 py-3 bg-bg-input border border-border-medium rounded-xl text-text-main outline-none focus:border-color-accent-purple transition-all text-sm font-semibold">
-                  <option value="Suit">{tf('apparelSuit', 'Suit')}</option>
-                  <option value="Shirt">{tf('apparelShirt', 'Shirt')}</option>
-                  <option value="Kurta">{tf('apparelKurta', 'Kurta')}</option>
-                  <option value="Blouse">{tf('apparelBlouse', 'Blouse')}</option>
-                  <option value="Lehenga">{tf('apparelLehenga', 'Lehenga')}</option>
-                  <option value="Pants">{tf('apparelPants', 'Pants')}</option>
+                  <option value="Suit">{tf('suit', 'Suit')}</option>
+                  <option value="Shirt">{tf('shirt', 'Shirt')}</option>
+                  <option value="Kurta">{tf('kurta', 'Kurta')}</option>
+                  <option value="Blouse">{tf('blouse', 'Blouse')}</option>
+                  <option value="Lehenga">{tf('lehenga', 'Lehenga')}</option>
+                  <option value="Pants">{tf('pants', 'Pants')}</option>
                 </select>
               </div>
 
