@@ -460,6 +460,15 @@ export const translations = {
     deleteReasonPlaceholder: 'Optional: e.g. Closing shop, moving to another system...',
     loadingAction: 'Processing...',
     confirm: 'Confirm',
+    importData: 'Import All Data',
+    importDataDesc: 'Restore or merge your active shop data from a previously downloaded JSON backup file.',
+    conflictResolutionTitle: 'Conflict Resolution',
+    conflictResolutionDesc: 'Duplicate records were found. For each record, select which data you want to keep:',
+    keepExisting: 'Keep Current (Database)',
+    overwriteBackup: 'Overwrite (Backup File)',
+    selectAllExisting: 'Select All Database',
+    selectAllBackup: 'Select All Backup',
+    resolveAndImport: 'Resolve & Import',
   },
   gu: {
     // Navigation & Sidebar
@@ -921,6 +930,15 @@ export const translations = {
     deleteReasonPlaceholder: 'વૈકલ્પિક: દા.ત. દુકાન બંધ કરવી, અન્ય સિસ્ટમ પર જવું...',
     loadingAction: 'પ્રક્રિયા થઈ રહી છે...',
     confirm: 'ખાતરી કરો',
+    importData: 'બધો ડેટા ઇમ્પોર્ટ કરો',
+    importDataDesc: 'પહેલાં ડાઉનલોડ કરેલી JSON બેકઅપ ફાઇલમાંથી તમારી સક્રિય દુકાનનો ડેટા પુનઃસ્થાપિત અથવા મર્જ કરો.',
+    conflictResolutionTitle: 'વિરોધાભાસ નિવારણ',
+    conflictResolutionDesc: 'ડુપ્લિકેટ રેકોર્ડ્સ મળ્યા છે. દરેક રેકોર્ડ માટે, તમે કયો ડેટા રાખવા માંગો છો તે પસંદ કરો:',
+    keepExisting: 'વર્તમાન રાખો (ડેટાબેઝ)',
+    overwriteBackup: 'ઓવરરાઇટ કરો (બેકઅપ ફાઇલ)',
+    selectAllExisting: 'બધા ડેટાબેઝ પસંદ કરો',
+    selectAllBackup: 'બધા બેકઅપ પસંદ કરો',
+    resolveAndImport: 'ઉકેલો અને ઇમ્પોર્ટ કરો',
   },
   hi: {
     // Navigation & Sidebar
@@ -1382,5 +1400,14 @@ export const translations = {
     deleteReasonPlaceholder: 'वैकल्पिक: जैसे दुकान बंद करना, किसी अन्य सिस्टम पर जाना...',
     loadingAction: 'प्रक्रिया जारी है...',
     confirm: 'पुष्टि करें',
+    importData: 'सभी डेटा आयात करें',
+    importDataDesc: 'पहले डाउनलोड की गई JSON बैकअप फ़ाइल से अपनी सक्रिय दुकान के डेटा को पुनर्स्थापित या मर्ज करें।',
+    conflictResolutionTitle: 'संघर्ष समाधान',
+    conflictResolutionDesc: 'डुप्लिकेट रिकॉर्ड पाए गए हैं। प्रत्येक रिकॉर्ड के लिए, चुनें कि आप कौन सा डेटा रखना चाहते हैं:',
+    keepExisting: 'वर्तमान रखें (डेटाबेस)',
+    overwriteBackup: 'ओवरराइट करें (बैकअप फ़ाइल)',
+    selectAllExisting: 'सभी डेटाबेस चुनें',
+    selectAllBackup: 'सभी बैकअप चुनें',
+    resolveAndImport: 'समाधान करें और आयात करें',
   }
 };

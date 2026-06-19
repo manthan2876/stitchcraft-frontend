@@ -237,11 +237,10 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
                     <div
                       key={n._id}
                       onClick={() => {
-                        if (!n.read) handleMarkSingleRead(n._id, { stopPropagation: () => {} });
+                        if (!n.read) handleMarkSingleRead(n._id, { stopPropagation: () => { } });
                       }}
-                      className={`p-3 sm:p-4 hover:bg-bg-hover/40 transition-colors flex items-start gap-3 cursor-pointer ${
-                        n.read ? 'opacity-70' : 'bg-color-accent-purple/5'
-                      }`}
+                      className={`p-3 sm:p-4 hover:bg-bg-hover/40 transition-colors flex items-start gap-3 cursor-pointer ${n.read ? 'opacity-70' : 'bg-color-accent-purple/5'
+                        }`}
                     >
                       <div className="p-2 rounded-xl bg-bg-secondary border border-border-subtle flex items-center justify-center shrink-0">
                         {getNotificationIcon(n.message)}
@@ -307,14 +306,15 @@ export const Topbar = ({ pageTitle = 'Dashboard', onMenuToggle }) => {
               {user?.role?.toLowerCase() === 'owner' ? t('roleOwner') : (user?.role || t('roleOwner'))}
             </span>
           </div>
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-color-accent-purple/10 flex items-center justify-center shadow-lg transition-all">
-            {avatarUrl ? (
-              <img src={avatarUrl} className="w-full h-full object-cover" alt="Profile" />
-            ) : (
-              <span className="text-text-main font-black text-sm">
-                {(user?.name || 'MR').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-              </span>
-            )}
+
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-border-medium group-hover:border-color-accent-purple/60 bg-bg-card flex items-center justify-center shadow-md transition-all">
+            {/* HERE IS THE FIX: Use avatarUrl instead of user.avatar */}
+            <img
+              src={avatarUrl || ProfileImage}
+              alt="Profile"
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
           </div>
         </button>
       </div>
