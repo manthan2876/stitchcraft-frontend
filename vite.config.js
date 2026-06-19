@@ -8,6 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  server: {
+    host: '127.0.0.1',
+    hmr: {
+      host: 'localhost',
+      protocol: 'ws',
+      clientPort: 5173,
+    },
+  },
   build: {
     rollupOptions: {
       output: {
