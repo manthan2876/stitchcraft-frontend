@@ -26,15 +26,13 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { name: t('dashboard'), path: '/dashboard', icon: <MdDashboard className="w-5 h-5" /> },
     { name: t('orders') !== 'orders' ? t('orders') : 'Orders', path: '/orders', icon: <MdAddCircle className="w-5 h-5" /> },
+    { name: t('customerRegistry') !== 'customerRegistry' ? t('customerRegistry') : 'Customers', path: '/customers', icon: <MdPeople className="w-5 h-5" /> },
+    { name: t('deliveries') !== 'deliveries' ? t('deliveries') : 'Deliveries', path: '/deliveries', icon: <MdLocalShipping className="w-5 h-5" /> },
     { name: t('invoices') !== 'invoices' ? t('invoices') : 'Invoices', path: '/invoices', icon: <MdReceiptLong className="w-5 h-5" /> },
     { name: t('payments') !== 'payments' ? t('payments') : 'Payments', path: '/payments', icon: <MdReceipt className="w-5 h-5" /> },
-    { name: t('ledger') !== 'ledger' ? t('ledger') : 'Ledger', path: '/ledger', icon: <MdAccountBalance className="w-5 h-5" /> },
-    { name: t('deliveries') !== 'deliveries' ? t('deliveries') : 'Deliveries', path: '/deliveries', icon: <MdLocalShipping className="w-5 h-5" /> },
     { name: t('karigars') !== 'karigars' ? t('karigars') : 'Karigars', path: '/karigars', icon: <MdAssignmentInd className="w-5 h-5" /> },
     { name: t('machines') !== 'machines' ? t('machines') : 'Machines', path: '/machines', icon: <GiSewingMachine className="w-5 h-5" /> },
     { name: t('inventory') !== 'inventory' ? t('inventory') : 'Inventory', path: '/inventory', icon: <MdInventory className="w-5 h-5" /> },
-    { name: t('profile'), path: '/profile', icon: <MdPerson className="w-5 h-5" /> },
-    { name: t('customerRegistry') !== 'customerRegistry' ? t('customerRegistry') : 'Customers', path: '/customers', icon: <MdPeople className="w-5 h-5" /> },
   ];
 
   return (
